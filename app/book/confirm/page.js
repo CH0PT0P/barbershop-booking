@@ -73,6 +73,20 @@ export default function ConfirmPage() {
         })
       if (apptError) throw apptError
 
+// Send confirmation text
+      const dateStr2 = booking.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      await fetch('/api/send-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: booking.name,
+          phone: booking.phone.replace(/\D/g, ''),
+          service: booking.service.name,
+          date: dateStr2,
+          time: formatTime(booking.time)
+        })
+      })
+
       // Clear localStorage
       localStorage.removeItem('selectedService')
       localStorage.removeItem('selectedDate')
