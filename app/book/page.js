@@ -5,24 +5,28 @@ const services = [
   {
     name: "Men's Cut",
     price: 35,
+    duration: 40,
     emoji: '✂️',
     description: 'A bespoke cut tailored to you. Because no two clients are the same.',
   },
   {
     name: 'Kids Cut',
     price: 25,
+    duration: 30,
     emoji: '✂️',
     description: 'Tots to teens (14 & under) — give them the confidence to tackle life.',
   },
   {
     name: 'Beard Trim',
     price: 15,
+    duration: 15,
     emoji: '🧔',
     description: 'Shaped, lined, and looking sharp.',
   },
   {
     name: 'Mullet Trim',
     price: 15,
+    duration: 15,
     emoji: '🤙',
     description: 'Business in the front, party in the back. A cleanup of the sides and neckline — not a full cut.',
   },

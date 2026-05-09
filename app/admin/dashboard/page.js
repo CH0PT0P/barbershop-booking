@@ -349,7 +349,8 @@ export default function Dashboard() {
   }
 
   const services = ["Men's Cut", 'Kids Cut', 'Beard Trim', 'Mullet Trim']
-  const today = new Date().toISOString().split('T')[0]
+  const now = new Date()
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   const todayAppts = appointments.filter(a => a.date === today && a.status === 'booked')
   const upcomingAppts = appointments.filter(a => a.date > today && a.status === 'booked')
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -360,7 +361,7 @@ export default function Dashboard() {
   const firstDay = new Date(calYear, calMonthIndex, 1).getDay()
   const daysInMonth = new Date(calYear, calMonthIndex + 1, 0).getDate()
 
-  const viewDateStr = viewDate.toISOString().split('T')[0]
+  const viewDateStr = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}-${String(viewDate.getDate()).padStart(2, '0')}`
   const dayAppts = appointments.filter(a => a.date === viewDateStr && a.status === 'booked')
   const DAY_START = 11
   const DAY_END = 18
@@ -368,8 +369,8 @@ export default function Dashboard() {
   const TIMELINE_HEIGHT = 600
 
   function timeToMinutes(timeStr) {
-    const [h, m] = timeStr.split(':').map(Number)
-    return h * 60 + m
+    const parts = timeStr.split(':').map(Number)
+    return parts[0] * 60 + parts[1]
   }
 
   function getTopPercent(timeStr) {
@@ -489,7 +490,7 @@ export default function Dashboard() {
                 ))}
                 {dayAppts.map((appt) => {
                   const duration = getServiceDuration(appt.service)
-                  const top = getTopPercent(appt.time)
+                  const top = getTopPercent(appt.time.slice(0, 5))
                   const height = getHeightPercent(duration)
                   const colorClass = getServiceColor(appt.service)
                   return (
