@@ -8,10 +8,12 @@ export default function Dashboard() {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('today')
+  const [clients, setClients] = useState([])
 
   useEffect(() => {
     checkAuth()
     fetchAppointments()
+    fetchClients()
   }, [])
 
   async function checkAuth() {
@@ -34,8 +36,21 @@ export default function Dashboard() {
     setLoading(false)
   }
 
+  async function fetchClients() {
+    const { data, error } = await supabase
+      .from('clients')
+      .select(`
+        *,
+        appointments (id, date, time, service, status)
+      `)
+      .order('created_at', { ascending: false })
+
+    if (error) console.error(error)
+    else setClients(data)
+  }
+
   async function cancelAppointment(id, clientName) {
-    const confirmed = window.confirm(`Cancel ${clientName}'s appointment? This will send them a cancellation text.`)
+    const confirmed = window.confirm(`Cancel ${clientName}'s appointment? This cannot be undone.`)
     if (!confirmed) return
 
     const { error } = await supabase
@@ -125,42 +140,85 @@ export default function Dashboard() {
           >
             Upcoming
           </button>
+          <button
+            onClick={() => setActiveTab('clients')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+              activeTab === 'clients'
+                ? 'bg-white text-black'
+                : 'bg-zinc-900 text-gray-400 hover:text-white'
+            }`}
+          >
+            Clients
+          </button>
         </div>
 
         {/* Appointments */}
-        {loading ? (
-          <p className="text-gray-400">Loading...</p>
-        ) : filteredAppts.length === 0 ? (
-          <p className="text-gray-400">No appointments {activeTab === 'today' ? 'today' : 'upcoming'}.</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {filteredAppts.map((appt) => (
-              <div
-                key={appt.id}
-                className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold text-lg">{appt.clients?.name}</p>
-                    <p className="text-gray-400 text-sm">{appt.service}</p>
-                    <p className="text-gray-400 text-sm">
-                      {new Date(appt.date + 'T00:00:00').toLocaleDateString('en-US', {
-                        weekday: 'long', month: 'long', day: 'numeric'
-                      })} at {formatTime(appt.time)}
-                    </p>
-                    <p className="text-gray-400 text-sm">{appt.clients?.phone}</p>
-                  </div>
-                  <button
-                    onClick={() => cancelAppointment(appt.id, appt.clients?.name)}
-                    className="text-red-400 hover:text-red-300 text-sm transition"
+        {activeTab !== 'clients' && (
+          <>
+            {loading ? (
+              <p className="text-gray-400">Loading...</p>
+            ) : filteredAppts.length === 0 ? (
+              <p className="text-gray-400">No appointments {activeTab === 'today' ? 'today' : 'upcoming'}.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {filteredAppts.map((appt) => (
+                  <div
+                    key={appt.id}
+                    className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5"
                   >
-                    Cancel
-                  </button>
-                </div>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-lg">{appt.clients?.name}</p>
+                        <p className="text-gray-400 text-sm">{appt.service}</p>
+                        <p className="text-gray-400 text-sm">
+                          {new Date(appt.date + 'T00:00:00').toLocaleDateString('en-US', {
+                            weekday: 'long', month: 'long', day: 'numeric'
+                          })} at {formatTime(appt.time)}
+                        </p>
+                        <p className="text-gray-400 text-sm">{appt.clients?.phone}</p>
+                      </div>
+                      <button
+                        onClick={() => cancelAppointment(appt.id, appt.clients?.name)}
+                        className="text-red-400 hover:text-red-300 text-sm transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+          </>
+        )}
+
+        {/* Clients Tab */}
+        {activeTab === 'clients' && (
+          <div className="flex flex-col gap-3">
+            {clients.length === 0 ? (
+              <p className="text-gray-400">No clients yet.</p>
+            ) : (
+              clients.map((client) => {
+                const totalVisits = client.appointments?.filter(a => a.status === 'completed').length
+                const upcoming = client.appointments?.filter(a => a.status === 'booked').length
+                return (
+                  <div key={client.id} className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5">
+                    <p className="font-semibold text-lg">{client.name}</p>
+                    <p className="text-gray-400 text-sm">{client.phone}</p>
+                    <div className="flex gap-4 mt-3">
+                      <span className="text-xs text-gray-500">
+                        {totalVisits} completed visit{totalVisits !== 1 ? 's' : ''}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {upcoming} upcoming
+                      </span>
+                    </div>
+                  </div>
+                )
+              })
+            )}
           </div>
         )}
+
       </div>
     </main>
   )
