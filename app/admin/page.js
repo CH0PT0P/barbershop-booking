@@ -1,224 +1,67 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
 
-export default function Dashboard() {
+export default function AdminLogin() {
   const router = useRouter()
-  const [appointments, setAppointments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('today')
-  const [clients, setClients] = useState([])
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    checkAuth()
-    fetchAppointments()
-    fetchClients()
-  }, [])
+  async function handleLogin() {
+    setLoading(true)
+    setError('')
 
-  async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) router.push('/admin')
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      setError('Invalid email or password.')
+      setLoading(false)
+      return
+    }
+
+    router.push('/admin/dashboard')
   }
-
-  async function fetchAppointments() {
-    const { data, error } = await supabase
-      .from('appointments')
-      .select(`
-        *,
-        clients (name, phone)
-      `)
-      .order('date', { ascending: true })
-      .order('time', { ascending: true })
-
-    if (error) console.error(error)
-    else setAppointments(data)
-    setLoading(false)
-  }
-
-  async function fetchClients() {
-    const { data, error } = await supabase
-      .from('clients')
-      .select(`
-        *,
-        appointments (id, date, time, service, status)
-      `)
-      .order('created_at', { ascending: false })
-
-    if (error) console.error(error)
-    else setClients(data)
-  }
-
-  async function cancelAppointment(id, clientName) {
-    const confirmed = window.confirm(`Cancel ${clientName}'s appointment? This cannot be undone.`)
-    if (!confirmed) return
-
-    const { error } = await supabase
-      .from('appointments')
-      .update({ status: 'cancelled' })
-      .eq('id', id)
-
-    if (!error) fetchAppointments()
-  }
-
-  async function handleLogout() {
-    await supabase.auth.signOut()
-    router.push('/admin')
-  }
-
-  function formatTime(time) {
-    const [hour, minute] = time.split(':')
-    const h = parseInt(hour)
-    const ampm = h >= 12 ? 'PM' : 'AM'
-    const displayHour = h > 12 ? h - 12 : h === 0 ? 12 : h
-    return `${displayHour}:${minute} ${ampm}`
-  }
-
-  const today = new Date().toISOString().split('T')[0]
-
-  const todayAppts = appointments.filter(a =>
-    a.date === today && a.status === 'booked'
-  )
-
-  const upcomingAppts = appointments.filter(a =>
-    a.date > today && a.status === 'booked'
-  )
-
-  const filteredAppts = activeTab === 'today' ? todayAppts : upcomingAppts
 
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-10">
-      <div className="max-w-2xl mx-auto">
+    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
+      <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
+      <p className="text-gray-400 mb-10">Dev The Barber Dashboard</p>
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">Dev The Barber</h1>
-            <p className="text-gray-400 text-sm">Admin Dashboard</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-400 hover:text-white transition"
-          >
-            Log Out
-          </button>
+      <div className="w-full max-w-sm flex flex-col gap-4">
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-white transition"
+          />
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-zinc-900 rounded-2xl p-5">
-            <p className="text-gray-400 text-sm mb-1">Today</p>
-            <p className="text-3xl font-bold">{todayAppts.length}</p>
-            <p className="text-gray-400 text-sm">appointments</p>
-          </div>
-          <div className="bg-zinc-900 rounded-2xl p-5">
-            <p className="text-gray-400 text-sm mb-1">Upcoming</p>
-            <p className="text-3xl font-bold">{upcomingAppts.length}</p>
-            <p className="text-gray-400 text-sm">appointments</p>
-          </div>
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-white transition"
+          />
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('today')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              activeTab === 'today'
-                ? 'bg-white text-black'
-                : 'bg-zinc-900 text-gray-400 hover:text-white'
-            }`}
-          >
-            Today
-          </button>
-          <button
-            onClick={() => setActiveTab('upcoming')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              activeTab === 'upcoming'
-                ? 'bg-white text-black'
-                : 'bg-zinc-900 text-gray-400 hover:text-white'
-            }`}
-          >
-            Upcoming
-          </button>
-          <button
-            onClick={() => setActiveTab('clients')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              activeTab === 'clients'
-                ? 'bg-white text-black'
-                : 'bg-zinc-900 text-gray-400 hover:text-white'
-            }`}
-          >
-            Clients
-          </button>
-        </div>
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
-        {/* Appointments */}
-        {activeTab !== 'clients' && (
-          <>
-            {loading ? (
-              <p className="text-gray-400">Loading...</p>
-            ) : filteredAppts.length === 0 ? (
-              <p className="text-gray-400">No appointments {activeTab === 'today' ? 'today' : 'upcoming'}.</p>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {filteredAppts.map((appt) => (
-                  <div
-                    key={appt.id}
-                    className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold text-lg">{appt.clients?.name}</p>
-                        <p className="text-gray-400 text-sm">{appt.service}</p>
-                        <p className="text-gray-400 text-sm">
-                          {new Date(appt.date + 'T00:00:00').toLocaleDateString('en-US', {
-                            weekday: 'long', month: 'long', day: 'numeric'
-                          })} at {formatTime(appt.time)}
-                        </p>
-                        <p className="text-gray-400 text-sm">{appt.clients?.phone}</p>
-                      </div>
-                      <button
-                        onClick={() => cancelAppointment(appt.id, appt.clients?.name)}
-                        className="text-red-400 hover:text-red-300 text-sm transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Clients Tab */}
-        {activeTab === 'clients' && (
-          <div className="flex flex-col gap-3">
-            {clients.length === 0 ? (
-              <p className="text-gray-400">No clients yet.</p>
-            ) : (
-              clients.map((client) => {
-                const totalVisits = client.appointments?.filter(a => a.status === 'completed').length
-                const upcoming = client.appointments?.filter(a => a.status === 'booked').length
-                return (
-                  <div key={client.id} className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5">
-                    <p className="font-semibold text-lg">{client.name}</p>
-                    <p className="text-gray-400 text-sm">{client.phone}</p>
-                    <div className="flex gap-4 mt-3">
-                      <span className="text-xs text-gray-500">
-                        {totalVisits} completed visit{totalVisits !== 1 ? 's' : ''}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {upcoming} upcoming
-                      </span>
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-        )}
-
+        <button
+          onClick={handleLogin}
+          disabled={loading}
+          className="w-full bg-white text-black py-4 rounded-full font-semibold text-lg disabled:opacity-50 hover:bg-gray-200 transition mt-2"
+        >
+          {loading ? 'Logging in...' : 'Log In'}
+        </button>
       </div>
     </main>
   )
