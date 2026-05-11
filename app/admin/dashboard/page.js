@@ -125,12 +125,17 @@ export default function Dashboard() {
     if (!error) fetchOverrides()
   }
 
-  async function cancelAppointment(id, clientName) {
-    const confirmed = window.confirm(`Cancel ${clientName}'s appointment? This cannot be undone.`)
+  async function updateAppointmentStatus(id, status, clientName) {
+    const messages = {
+      cancelled: `Cancel ${clientName}'s appointment? This cannot be undone.`,
+      no_show: `Mark ${clientName} as a no-show?`,
+      completed: `Mark ${clientName}'s appointment as complete?`
+    }
+    const confirmed = window.confirm(messages[status])
     if (!confirmed) return
     const { error } = await supabase
       .from('appointments')
-      .update({ status: 'cancelled' })
+      .update({ status })
       .eq('id', id)
     if (!error) {
       fetchAppointments()
@@ -500,7 +505,9 @@ export default function Dashboard() {
                       className={`absolute left-2 right-2 rounded-xl border-l-4 px-3 py-2 text-left transition hover:opacity-90 ${colorClass}`}
                       style={{ top: `${top}%`, height: `${height}%`, minHeight: '36px' }}
                     >
-                      <p className="text-white text-sm font-semibold truncate">{appt.clients?.name}</p>
+                      <p className="text-white text-sm font-semibold truncate">
+                        {appt.clients?.name} {appt.notes ? '📝' : ''}
+                      </p>
                       {height > 8 && <p className="text-white/70 text-xs truncate">{appt.service}</p>}
                     </button>
                   )
@@ -552,7 +559,7 @@ export default function Dashboard() {
                         <p className="text-gray-400 text-sm">{appt.clients?.phone}</p>
                       </div>
                       <button
-                        onClick={() => cancelAppointment(appt.id, appt.clients?.name)}
+                        onClick={() => updateAppointmentStatus(appt.id, 'cancelled', appt.clients?.name)}
                         className="text-red-400 hover:text-red-300 text-sm transition"
                       >
                         Cancel
@@ -859,8 +866,8 @@ export default function Dashboard() {
 
       {/* Appointment detail popup */}
       {selectedAppt && !showBookNext && (
-        <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50" onClick={() => setSelectedAppt(null)}>
-          <div className="bg-zinc-900 border border-zinc-700 rounded-t-3xl w-full max-w-lg p-6 pb-10" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0}} onClick={() => setSelectedAppt(null)}>
+          <div className="bg-zinc-900 border border-zinc-700 rounded-t-3xl w-full p-6 pb-10 min-h-[67vh] max-h-[80vh] overflow-y-auto" style={{position: 'relative', zIndex: 9999}} onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-zinc-600 rounded-full mx-auto mb-6" />
             <div className={`w-3 h-3 rounded-full ${getServiceColor(selectedAppt.service).split(' ')[0]} mb-4`} />
             <h2 className="text-2xl font-bold mb-1">{selectedAppt.clients?.name}</h2>
@@ -884,6 +891,12 @@ export default function Dashboard() {
                 <span className="text-gray-400">Duration</span>
                 <span className="font-medium">{getServiceDuration(selectedAppt.service)} min</span>
               </div>
+              {selectedAppt.notes && (
+                <div className="flex flex-col gap-1 border-t border-zinc-700 pt-3">
+                  <span className="text-gray-400">Notes</span>
+                  <span className="font-medium text-sm">{selectedAppt.notes}</span>
+                </div>
+              )}
             </div>
             <div className="flex flex-col gap-3">
               <button
@@ -892,12 +905,26 @@ export default function Dashboard() {
               >
                 Book Next Appointment
               </button>
-              <button
-                onClick={() => cancelAppointment(selectedAppt.id, selectedAppt.clients?.name)}
-                className="w-full bg-red-600 hover:bg-red-500 text-white py-3 rounded-full font-semibold transition"
-              >
-                Cancel Appointment
-              </button>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => updateAppointmentStatus(selectedAppt.id, 'cancelled', selectedAppt.clients?.name)}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-red-400 py-3 rounded-full text-sm font-semibold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateAppointmentStatus(selectedAppt.id, 'no_show', selectedAppt.clients?.name)}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-yellow-400 py-3 rounded-full text-sm font-semibold transition"
+                >
+                  No Show
+                </button>
+                <button
+                  onClick={() => updateAppointmentStatus(selectedAppt.id, 'completed', selectedAppt.clients?.name)}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-green-400 py-3 rounded-full text-sm font-semibold transition"
+                >
+                  Complete
+                </button>
+              </div>
             </div>
           </div>
         </div>
