@@ -127,90 +127,134 @@ const ICONS = {
 }
 
 function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, price }) {
-  const x = useMotionValue(0)
-  const opacity = useTransform(x, [-120, -60, 0], [0, 0.3, 1])
+  const controls = useAnimationControls()
   const [removing, setRemoving] = useState(false)
-  const [buttonTriggered, setButtonTriggered] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+  const [height, setHeight] = useState('auto')
+  const ref = useRef(null)
 
-  function triggerRemove(fromButton = false) {
-    setButtonTriggered(fromButton)
+  const SWIPE_THRESHOLD = 80
+  const DISMISS_THRESHOLD = 200
+  const VELOCITY_THRESHOLD = 600
+
+  const snappySpring = {
+    type: 'spring',
+    stiffness: 500,
+    damping: 50,
+    mass: 1,
+  }
+
+  async function animateOut() {
     setRemoving(true)
-    animate(x, -500, { duration: fromButton ? 1.3 : 0.3, ease: 'easeOut' })
+    // 1. capture current height
+    const h = ref.current?.offsetHeight || 60
+    setHeight(h)
+    // 2. slide out horizontally
+    await controls.start({
+      x: '-100%',
+      transition: snappySpring,
+    })
+    // 3. collapse height + fade
+    await controls.start({
+      height: 0,
+      opacity: 0,
+      transition: { duration: 0.2, ease: 'easeIn' },
+    })
+    onRemove(uid)
+  }
+
+  async function triggerRemove() {
+    await animateOut()
   }
 
   function handleDragEnd(_, info) {
-    if (info.offset.x < -80) {
-      triggerRemove(false)
+    const offset = info.offset.x
+    const velocity = info.velocity.x
+
+    if (velocity < -VELOCITY_THRESHOLD || offset < -DISMISS_THRESHOLD) {
+      animateOut()
+    } else if (offset < -SWIPE_THRESHOLD) {
+      setRevealed(true)
+      controls.start({ x: -80, transition: snappySpring })
     } else {
-      animate(x, 0, { type: 'spring', stiffness: 500, damping: 35 })
+      setRevealed(false)
+      controls.start({ x: 0, transition: snappySpring })
     }
   }
 
   return (
-    <AnimatePresence onExitComplete={() => onRemove(uid)}>
-      {!removing && (
-        <motion.div
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: buttonTriggered ? 1.5 : 0.25, ease: 'easeOut' }}
-          style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}
-        >
+    <div ref={ref} style={{
+      position: 'relative',
+      borderRadius: 16,
+      overflow: 'hidden',
+      height: removing ? height : 'auto',
+    }}>
+      {/* Red delete background */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: '#DC343B',
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+        paddingRight: 16, borderRadius: 16,
+      }}>
+        <button
+          onClick={animateOut}
+          style={{
+            border: 0, background: 'transparent', cursor: 'pointer',
+            color: 'white', fontFamily: '-apple-system, system-ui, sans-serif',
+            fontSize: 13, fontWeight: 600,
+          }}>Delete</button>
+      </div>
+
+      {/* Draggable card */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -300, right: 0 }}
+        dragElastic={{ left: 0.1, right: 0.3 }}
+        dragMomentum={false}
+        animate={controls}
+        onDragEnd={handleDragEnd}
+        style={{ position: 'relative', zIndex: 1 }}
+      >
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          background: PAL.card, borderRadius: 16, padding: '10px 12px',
+          border: '0.5px solid rgba(31,26,20,0.10)',
+        }}>
           <div style={{
-            position: 'absolute', inset: 0,
-            background: '#DC343B',
-            display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-            paddingRight: 20, borderRadius: 16,
+            width: 38, height: 38, borderRadius: 11,
+            background: accent + '2E',
+            border: `1px solid ${accent}55`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
           }}>
-            <span style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>Remove</span>
+            <Icon size={26} color={PAL.ink}/>
           </div>
-          <motion.div
-            drag="x"
-            dragConstraints={{ left: -120, right: 0 }}
-            dragElastic={0.05}
-            style={{ x, opacity, position: 'relative', zIndex: 1 }}
-            onDragEnd={handleDragEnd}
-          >
+          <div style={{ flex: 1 }}>
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              background: PAL.card, borderRadius: 16, padding: '10px 12px',
-              border: '0.5px solid rgba(31,26,20,0.10)',
+              fontFamily: 'var(--font-serif)', fontSize: 18,
+              color: PAL.ink, letterSpacing: -0.2,
+            }}>{name}</div>
+            <div style={{
+              fontFamily: '-apple-system, system-ui, sans-serif',
+              fontSize: 11, color: PAL.ink3, marginTop: 2,
+            }}>{duration} min · ${price}</div>
+          </div>
+          <button
+            onClick={triggerRemove}
+            style={{
+              border: 0, background: 'transparent', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 4,
+              padding: '4px 0 0', flexShrink: 0,
             }}>
-              <div style={{
-                width: 38, height: 38, borderRadius: 11,
-                background: accent + '2E',
-                border: `1px solid ${accent}55`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <Icon size={26} color={PAL.ink}/>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontFamily: 'var(--font-serif)', fontSize: 18,
-                  color: PAL.ink, letterSpacing: -0.2,
-                }}>{name}</div>
-                <div style={{
-                  fontFamily: '-apple-system, system-ui, sans-serif',
-                  fontSize: 11, color: PAL.ink3, marginTop: 2,
-                }}>{duration} min · ${price}</div>
-              </div>
-              <button
-                onClick={() => triggerRemove(true)}
-                style={{
-                  border: 0, background: 'transparent', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '4px 0 0', flexShrink: 0,
-                }}>
-                <ArrowLeft size={14} color={PAL.ink3}/>
-                <span style={{
-                  fontFamily: '-apple-system, system-ui, sans-serif',
-                  fontSize: 11, color: PAL.ink3,
-                }}>remove</span>
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            <ArrowLeft size={14} color={PAL.ink3}/>
+            <span style={{
+              fontFamily: '-apple-system, system-ui, sans-serif',
+              fontSize: 11, color: PAL.ink3,
+            }}>remove</span>
+          </button>
+        </div>
+      </motion.div>
+    </div>
   )
 }
 
