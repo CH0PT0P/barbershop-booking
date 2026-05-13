@@ -274,7 +274,8 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
     onSwipedUp: () => { if (!empty) setOpen(true) },
     onSwipedDown: () => setOpen(false),
     trackMouse: false,
-    touchEventOptions: { passive: true },
+    touchEventOptions: { passive: false },
+    preventScrollOnSwipe: true,
     delta: 30,
   })
 
@@ -282,7 +283,7 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
     <div {...drawerSwipe} style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30 }}>
       <motion.div
         animate={{ maxHeight: open ? 400 : 110 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 40 }}
         style={{
           background: PAL.paper,
           borderTopLeftRadius: 26, borderTopRightRadius: 26,
