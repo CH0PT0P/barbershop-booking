@@ -229,23 +229,21 @@ function StickerCard({ service, count, onAdd }) {
   )
 }
 
-function BookingDrawer({ bookings, onChangeName, onRemove, onClear, open, setOpen, onContinue }) {
+function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue }) {
   const total = bookings.reduce((sum, b) => sum + b.price, 0)
   const totalMin = bookings.reduce((sum, b) => sum + b.duration, 0)
   const count = bookings.length
   const empty = count === 0
 
   return (
-    <div style={{
-      position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30,
-    }}>
+    <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30 }}>
       <div style={{
         background: PAL.paper,
         borderTopLeftRadius: 26, borderTopRightRadius: 26,
         boxShadow: '0 -10px 30px rgba(31,26,20,0.18)',
         borderTop: '0.5px solid rgba(31,26,20,0.12)',
         overflow: 'hidden',
-        maxHeight: open ? 460 : 110,
+        maxHeight: open ? 400 : 110,
         transition: 'max-height 0.32s cubic-bezier(.2,.7,.2,1)',
       }}>
         {/* Handle */}
@@ -264,10 +262,9 @@ function BookingDrawer({ bookings, onChangeName, onRemove, onClear, open, setOpe
         >
           <div style={{ flex: 1, minWidth: 0 }}>
             {empty ? (
-              <div style={{
-                fontFamily: 'var(--font-hand)', fontSize: 20,
-                color: PAL.ink2, lineHeight: 1.1,
-              }}>tap a sticker to get started —</div>
+              <div style={{ fontFamily: 'var(--font-hand)', fontSize: 20, color: PAL.ink2 }}>
+                tap a sticker to get started —
+              </div>
             ) : (
               <>
                 <div style={{
@@ -312,7 +309,7 @@ function BookingDrawer({ bookings, onChangeName, onRemove, onClear, open, setOpe
           </button>
         </div>
 
-        {/* Expanded list */}
+        {/* Expanded list — just service names, no name inputs */}
         {!empty && (
           <div style={{
             padding: '4px 16px 18px',
@@ -320,13 +317,8 @@ function BookingDrawer({ bookings, onChangeName, onRemove, onClear, open, setOpe
             opacity: open ? 1 : 0,
             transition: 'opacity 0.22s',
             pointerEvents: open ? 'auto' : 'none',
-            maxHeight: 320, overflowY: 'auto',
+            maxHeight: 280, overflowY: 'auto',
           }}>
-            <div style={{
-              fontFamily: 'var(--font-hand)', fontSize: 18,
-              color: PAL.ink2, marginBottom: -2, padding: '0 2px',
-            }}>who's it for?</div>
-
             {bookings.map((b) => {
               const Icon = ICONS[b.id]
               const accent = SERVICES.find(s => s.id === b.id)?.accent || PAL.terra
@@ -345,45 +337,24 @@ function BookingDrawer({ bookings, onChangeName, onRemove, onClear, open, setOpe
                   }}>
                     <Icon size={26} color={PAL.ink}/>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ flex: 1 }}>
                     <div style={{
                       fontFamily: 'var(--font-serif)', fontSize: 18,
                       color: PAL.ink, letterSpacing: -0.2,
                     }}>{b.name}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                      <div style={{
-                        fontFamily: 'var(--font-hand)', fontSize: 15,
-                        color: PAL.ink3, lineHeight: 1,
-                      }}>for</div>
-                      <input
-                        type="text"
-                        placeholder="name…"
-                        value={b.who}
-                        onChange={(e) => onChangeName(b.uid, e.target.value)}
-                        style={{
-                          flex: 1, border: 0, outline: 0, padding: '2px 0',
-                          background: 'transparent',
-                          borderBottom: `1.2px dashed ${PAL.ink3}88`,
-                          fontFamily: 'var(--font-hand)', fontSize: 17,
-                          color: PAL.ink, lineHeight: 1.1,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{
-                      fontFamily: 'var(--font-serif)', fontStyle: 'italic',
-                      fontSize: 20, color: PAL.ink, lineHeight: 1,
-                    }}>${b.price}</div>
-                    <button
-                      onClick={() => onRemove(b.uid)}
-                      style={{
-                        border: 0, background: 'transparent', cursor: 'pointer',
-                        fontFamily: '-apple-system, system-ui, sans-serif',
-                        fontSize: 11, color: PAL.ink3,
-                        textDecoration: 'underline', padding: '4px 0 0',
-                      }}>remove</button>
+                      fontFamily: '-apple-system, system-ui, sans-serif',
+                      fontSize: 11, color: PAL.ink3, marginTop: 2,
+                    }}>{b.duration} min · ${b.price}</div>
                   </div>
+                  <button
+                    onClick={() => onRemove(b.uid)}
+                    style={{
+                      border: 0, background: 'transparent', cursor: 'pointer',
+                      fontFamily: '-apple-system, system-ui, sans-serif',
+                      fontSize: 11, color: PAL.ink3,
+                      textDecoration: 'underline', padding: '4px 0 0',
+                    }}>remove</button>
                 </div>
               )
             })}
