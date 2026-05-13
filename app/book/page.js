@@ -131,9 +131,9 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
   const opacity = useTransform(x, [-120, -60, 0], [0, 0.3, 1])
   const [removing, setRemoving] = useState(false)
 
-  function triggerRemove() {
+  function triggerRemove(fromButton = false) {
     setRemoving(true)
-    animate(x, -500, { duration: 0.2, ease: 'easeOut' })
+    animate(x, -500, { duration: fromButton ? 0.4 : 0.2, ease: 'easeOut' })
   }
 
   function handleDragEnd(_, info) {
@@ -192,13 +192,17 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
                 }}>{duration} min · ${price}</div>
               </div>
               <button
-                onClick={triggerRemove}
+                onClick={() => triggerRemove(true)}
                 style={{
                   border: 0, background: 'transparent', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center',
+                  display: 'flex', alignItems: 'center', gap: 4,
                   padding: '4px 0 0', flexShrink: 0,
                 }}>
-                <ArrowLeft size={16} color={PAL.ink3}/>
+                <ArrowLeft size={14} color={PAL.ink3}/>
+                <span style={{
+                  fontFamily: '-apple-system, system-ui, sans-serif',
+                  fontSize: 11, color: PAL.ink3,
+                }}>remove</span>
               </button>
             </div>
           </motion.div>
