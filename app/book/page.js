@@ -2,8 +2,8 @@
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { useSwipeable } from 'react-swipeable'
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
+import { motion, AnimatePresence, useMotionValue, useTransform, animate, useAnimationControls } from 'framer-motion'
 
 const PAL = {
   bg:      '#F1E8D2',
@@ -322,29 +322,50 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
 
   const COLLAPSED_HEIGHT = 110
   const EXPANDED_HEIGHT = 400
+  const controls = useAnimationControls()
   const y = useMotionValue(0)
+
+  // Sync animation when open state changes externally
+  useEffect(() => {
+    controls.start({
+      height: open ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT,
+      transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+    })
+  }, [open])
 
   function handleDragEnd(_, info) {
     const velocity = info.velocity.y
     const offset = info.offset.y
 
     if (open) {
-      // Currently open — close if dragged down enough or fast enough
-      if (offset > 60 || velocity > 400) {
+      if (offset > 80 || velocity > 500) {
         setOpen(false)
-        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+        controls.start({
+          height: COLLAPSED_HEIGHT,
+          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+        })
       } else {
-        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+        controls.start({
+          height: EXPANDED_HEIGHT,
+          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+        })
       }
     } else {
-      // Currently closed — open if dragged up enough or fast enough
-      if (!empty && (offset < -60 || velocity < -400)) {
+      if (!empty && (offset < -80 || velocity < -500)) {
         setOpen(true)
-        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+        controls.start({
+          height: EXPANDED_HEIGHT,
+          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+        })
       } else {
-        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+        controls.start({
+          height: COLLAPSED_HEIGHT,
+          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+        })
       }
     }
+    // Reset y position
+    animate(y, 0, { type: 'spring', stiffness: 350, damping: 40, mass: 1 })
   }
 
   return (
@@ -352,11 +373,12 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
       <motion.div
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.2, bottom: 0.2 }}
+        dragElastic={{ top: 0.4, bottom: 0.1 }}
+        dragMomentum={false}
         style={{ y }}
+        animate={controls}
+        initial={{ height: COLLAPSED_HEIGHT }}
         onDragEnd={handleDragEnd}
-        animate={{ height: open ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT }}
-        transition={{ type: 'spring', stiffness: 500, damping: 40 }}
       >
         <div style={{
           background: PAL.paper,
@@ -372,13 +394,11 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
           </div>
 
           {/* Header */}
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '8px 18px 10px',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '8px 18px 10px',
+            WebkitTapHighlightColor: 'transparent',
+          }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               {empty ? (
                 <div style={{ fontFamily: 'var(--font-hand)', fontSize: 20, color: PAL.ink2 }}>
@@ -432,7 +452,7 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
           {!empty && (
             <motion.div
               animate={{ opacity: open ? 1 : 0 }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.2 }}
               style={{
                 padding: '4px 16px 18px',
                 display: 'flex', flexDirection: 'column', gap: 8,
