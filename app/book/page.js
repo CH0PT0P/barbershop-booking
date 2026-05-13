@@ -151,7 +151,7 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
       {!removing && (
         <motion.div
           exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: buttonTriggered ? 1.05 : 0.25, ease: 'easeOut' }}
+          transition={{ duration: buttonTriggered ? 1.5 : 0.25, ease: 'easeOut' }}
           style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}
         >
           <div style={{
