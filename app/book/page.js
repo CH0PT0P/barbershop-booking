@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSwipeable } from 'react-swipeable'
 
 const PAL = {
@@ -63,7 +63,6 @@ const SERVICES = [
   },
 ]
 
-// SVG Icons
 function ScissorsIcon({ size = 44, color = PAL.ink }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
@@ -125,6 +124,16 @@ const ICONS = {
   mullet: MulletIcon,
 }
 
+function SwipeableItem({ uid, onRemove, children }) {
+  const handlers = useSwipeable({
+    onSwipedLeft: () => onRemove(uid),
+    trackMouse: false,
+    touchEventOptions: { passive: true },
+    delta: 50,
+  })
+  return <div {...handlers}>{children}</div>
+}
+
 function StickerCard({ service, count, onAdd }) {
   const Icon = ICONS[service.id]
   const selected = count > 0
@@ -141,13 +150,12 @@ function StickerCard({ service, count, onAdd }) {
         textAlign: 'left',
         transform: `rotate(${selected ? 0 : service.rotate}deg) scale(${selected ? 1.03 : 1})`,
         width: '100%',
-        height: 220,
+        height: '100%',
         transition: 'transform 0.18s cubic-bezier(.2,.9,.3,1.4)',
         WebkitTapHighlightColor: 'transparent',
         cursor: 'pointer',
       }}
     >
-      {/* Tape */}
       <div style={{
         position: 'absolute', top: -6, left: '50%',
         transform: 'translateX(-50%) rotate(-3deg)',
@@ -157,7 +165,6 @@ function StickerCard({ service, count, onAdd }) {
         zIndex: 4,
       }}/>
 
-      {/* Card background with dashed border */}
       <svg viewBox="0 0 100 100" preserveAspectRatio="none"
            width="100%" height="100%"
            style={{ position: 'absolute', inset: 0, filter: 'drop-shadow(0 6px 8px rgba(31,26,20,0.10))' }}>
@@ -169,44 +176,41 @@ function StickerCard({ service, count, onAdd }) {
               fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.7"/>
       </svg>
 
-      {/* Count badge */}
       {selected && (
         <div style={{
           position: 'absolute', top: -10, left: -8, zIndex: 6,
           width: 32, height: 32, borderRadius: '50%',
           background: PAL.ink, color: PAL.paper,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18,
+          fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17,
           border: `2.5px solid ${PAL.paper}`,
           boxShadow: '0 4px 10px rgba(31,26,20,0.25)',
           transform: 'rotate(-8deg)',
         }}>×{count}</div>
       )}
 
-      {/* Tag */}
       {service.tag && (
         <div style={{
           position: 'absolute', top: 10, right: 10, zIndex: 3,
-          fontFamily: 'var(--font-hand)', fontSize: 16, color: PAL.ink,
+          fontFamily: 'var(--font-hand)', fontSize: 15, color: PAL.ink,
           background: PAL.paper, padding: '1px 8px', borderRadius: 99,
           transform: 'rotate(5deg)', lineHeight: 1.3,
           border: '1px solid rgba(31,26,20,0.18)',
         }}>{service.tag}</div>
       )}
 
-      {/* Content */}
       <div style={{
         position: 'relative', zIndex: 2,
         width: '100%', height: '100%',
-        padding: '14px 14px 12px',
+        padding: '12px 12px 10px',
         display: 'flex', flexDirection: 'column',
       }}>
-        <div style={{ marginTop: 6 }}>
-          <Icon size={48} color={PAL.ink}/>
+        <div style={{ marginTop: 4 }}>
+          <Icon size={44} color={PAL.ink}/>
         </div>
         <div style={{
-          fontFamily: 'var(--font-serif)', fontSize: 24, lineHeight: 1.0,
-          color: PAL.ink, letterSpacing: -0.5, marginTop: 6,
+          fontFamily: 'var(--font-serif)', fontSize: 22, lineHeight: 1.0,
+          color: PAL.ink, letterSpacing: -0.5, marginTop: 4,
         }}>{service.name}</div>
         <div style={{
           fontFamily: '-apple-system, system-ui, sans-serif',
@@ -215,13 +219,13 @@ function StickerCard({ service, count, onAdd }) {
         }}>{service.blurb}</div>
         <div style={{
           display: 'flex', alignItems: 'baseline',
-          justifyContent: 'space-between', marginTop: 6,
+          justifyContent: 'space-between', marginTop: 4,
         }}>
+          <div style={{ fontFamily: 'var(--font-hand)', fontSize: 15, color: PAL.ink }}>
+            {service.duration} min
+          </div>
           <div style={{
-            fontFamily: 'var(--font-hand)', fontSize: 16, color: PAL.ink,
-          }}>{service.duration} min</div>
-          <div style={{
-            fontFamily: 'var(--font-serif)', fontSize: 28,
+            fontFamily: 'var(--font-serif)', fontSize: 26,
             color: PAL.ink, lineHeight: 1, fontStyle: 'italic',
           }}>${service.price}</div>
         </div>
@@ -236,11 +240,12 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
   const count = bookings.length
   const empty = count === 0
 
-    const drawerSwipe = useSwipeable({
+  const drawerSwipe = useSwipeable({
     onSwipedUp: () => { if (!empty) setOpen(true) },
     onSwipedDown: () => setOpen(false),
     trackMouse: false,
     touchEventOptions: { passive: true },
+    delta: 30,
   })
 
   return (
@@ -254,12 +259,10 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
         maxHeight: open ? 400 : 110,
         transition: 'max-height 0.32s cubic-bezier(.2,.7,.2,1)',
       }}>
-        {/* Handle */}
         <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: 2 }}>
           <div style={{ width: 38, height: 5, borderRadius: 99, background: 'rgba(31,26,20,0.25)' }}/>
         </div>
 
-        {/* Header */}
         <div
           onClick={() => !empty && setOpen(!open)}
           style={{
@@ -317,7 +320,6 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
           </button>
         </div>
 
-        {/* Expanded list — just service names, no name inputs */}
         {!empty && (
           <div style={{
             padding: '4px 16px 18px',
@@ -330,46 +332,42 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
             {bookings.map((b) => {
               const Icon = ICONS[b.id]
               const accent = SERVICES.find(s => s.id === b.id)?.accent || PAL.terra
-              const swipeItem = useSwipeable({
-                onSwipedLeft: () => onRemove(b.uid),
-                trackMouse: false,
-                touchEventOptions: { passive: true },
-              })
               return (
-                <div {...swipeItem} key={b.uid} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  background: PAL.card, borderRadius: 16, padding: '10px 12px',
-                  border: '0.5px solid rgba(31,26,20,0.10)',
-                  transition: 'transform 0.2s',
-                }}>
+                <SwipeableItem key={b.uid} uid={b.uid} onRemove={onRemove}>
                   <div style={{
-                    width: 38, height: 38, borderRadius: 11,
-                    background: accent + '2E',
-                    border: `1px solid ${accent}55`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    background: PAL.card, borderRadius: 16, padding: '10px 12px',
+                    border: '0.5px solid rgba(31,26,20,0.10)',
                   }}>
-                    <Icon size={26} color={PAL.ink}/>
-                  </div>
-                  <div style={{ flex: 1 }}>
                     <div style={{
-                      fontFamily: 'var(--font-serif)', fontSize: 18,
-                      color: PAL.ink, letterSpacing: -0.2,
-                    }}>{b.name}</div>
-                    <div style={{
-                      fontFamily: '-apple-system, system-ui, sans-serif',
-                      fontSize: 11, color: PAL.ink3, marginTop: 2,
-                    }}>{b.duration} min · ${b.price}</div>
+                      width: 38, height: 38, borderRadius: 11,
+                      background: accent + '2E',
+                      border: `1px solid ${accent}55`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <Icon size={26} color={PAL.ink}/>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        fontFamily: 'var(--font-serif)', fontSize: 18,
+                        color: PAL.ink, letterSpacing: -0.2,
+                      }}>{b.name}</div>
+                      <div style={{
+                        fontFamily: '-apple-system, system-ui, sans-serif',
+                        fontSize: 11, color: PAL.ink3, marginTop: 2,
+                      }}>{b.duration} min · ${b.price}</div>
+                    </div>
+                    <button
+                      onClick={() => onRemove(b.uid)}
+                      style={{
+                        border: 0, background: 'transparent', cursor: 'pointer',
+                        fontFamily: '-apple-system, system-ui, sans-serif',
+                        fontSize: 11, color: PAL.ink3,
+                        textDecoration: 'underline', padding: '4px 0 0',
+                      }}>remove</button>
                   </div>
-                  <button
-                    onClick={() => onRemove(b.uid)}
-                    style={{
-                      border: 0, background: 'transparent', cursor: 'pointer',
-                      fontFamily: '-apple-system, system-ui, sans-serif',
-                      fontSize: 11, color: PAL.ink3,
-                      textDecoration: 'underline', padding: '4px 0 0',
-                    }}>remove</button>
-                </div>
+                </SwipeableItem>
               )
             })}
 
@@ -406,17 +404,17 @@ export default function BookPage() {
     setBookings(prev => [...prev, {
       uid, id: service.id, name: service.name,
       price: service.price, duration: service.duration,
-      color: service.color, who: '',
+      color: service.color,
     }])
     setOpen(true)
   }
 
-  function changeName(uid, who) {
-    setBookings(prev => prev.map(b => b.uid === uid ? { ...b, who } : b))
-  }
-
   function remove(uid) {
-    setBookings(prev => prev.filter(b => b.uid !== uid))
+    setBookings(prev => {
+      const updated = prev.filter(b => b.uid !== uid)
+      if (updated.length === 0) setOpen(false)
+      return updated
+    })
   }
 
   function clear() {
@@ -426,31 +424,29 @@ export default function BookPage() {
 
   function handleContinue() {
     if (bookings.length === 0) return
-    // Save to localStorage — supports multiple bookings
     localStorage.setItem('selectedServices', JSON.stringify(bookings))
-    // Keep backwards compatibility for single booking
-    const first = bookings[0]
     localStorage.setItem('selectedService', JSON.stringify({
-      name: first.name, price: first.price, duration: first.duration
+      name: bookings[0].name,
+      price: bookings[0].price,
+      duration: bookings[0].duration,
     }))
     router.push('/book/date')
   }
 
   const countById = (id) => bookings.filter(b => b.id === id).length
-  const padBottom = 0
 
   return (
     <main style={{
-      height: '100vh',
+      position: 'fixed',
+      inset: 0,
       backgroundColor: PAL.bg,
       fontFamily: '-apple-system, system-ui, sans-serif',
       color: PAL.ink,
-      position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* Paper grain texture */}
+      {/* Paper grain */}
       <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none',
+        position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: 'radial-gradient(rgba(31,26,20,0.06) 1px, transparent 1px)',
         backgroundSize: '4px 4px', opacity: 0.55,
         mixBlendMode: 'multiply', zIndex: 0,
@@ -458,39 +454,46 @@ export default function BookPage() {
 
       <div style={{
         position: 'relative', zIndex: 1,
+        height: '100%',
         padding: '44px 20px 0px',
+        display: 'flex',
+        flexDirection: 'column',
       }}>
         {/* Header */}
-        <div style={{ padding: '0 4px 16px', position: 'relative' }}>
-          {/* Star doodle */}
+        <div style={{ padding: '0 4px 12px', position: 'relative', flexShrink: 0 }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
                style={{ position: 'absolute', top: 4, right: 4, transform: 'rotate(8deg)' }}>
             <path d="M12 3 L13.5 9 L20 10 L15 14 L16.5 21 L12 17 L7.5 21 L9 14 L4 10 L10.5 9 Z"
                   stroke={PAL.terra} strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
           </svg>
-
           <h1 style={{
-            fontFamily: 'var(--font-serif)', fontSize: 38, lineHeight: 1.05,
+            fontFamily: 'var(--font-serif)', fontSize: 36, lineHeight: 1.05,
             letterSpacing: -1.0, margin: 0, color: PAL.ink,
             fontWeight: 400, maxWidth: 260,
           }}>Pick a sticker</h1>
           <div style={{
-            fontFamily: 'var(--font-hand)', fontSize: 20, color: PAL.ink2,
-            lineHeight: 1.2, marginTop: 8,
+            fontFamily: 'var(--font-hand)', fontSize: 19, color: PAL.ink2,
+            lineHeight: 1.2, marginTop: 6,
             transform: 'rotate(-1.5deg)', transformOrigin: 'left',
           }}>tap one for you, two for the kids, all of em —</div>
         </div>
 
-        {/* Sticker grid */}
+        {/* Sticker grid — fills remaining space */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          gap: '24px 14px', paddingTop: 12, position: 'relative',
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gridTemplateRows: '1fr 1fr',
+          gap: '20px 14px',
+          paddingTop: 8,
+          paddingBottom: 120,
+          position: 'relative',
         }}>
-          {/* Arrow doodle between cards */}
           <svg width="36" height="36" viewBox="0 0 40 40"
                style={{
-                 position: 'absolute', top: 130, left: '47%',
+                 position: 'absolute', top: '42%', left: '47%',
                  transform: 'translateX(-50%) rotate(8deg)', zIndex: 5,
+                 pointerEvents: 'none',
                }}>
             <path d="M5 28 C 12 8, 22 8, 30 22 M22 17 L30 22 L26 30"
                   stroke={PAL.ink} strokeWidth="2" fill="none"
@@ -510,7 +513,6 @@ export default function BookPage() {
 
       <BookingDrawer
         bookings={bookings}
-        onChangeName={changeName}
         onRemove={remove}
         onClear={clear}
         open={open}
