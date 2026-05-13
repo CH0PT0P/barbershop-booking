@@ -135,7 +135,7 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
   function triggerRemove(fromButton = false) {
     setButtonTriggered(fromButton)
     setRemoving(true)
-    animate(x, -500, { duration: fromButton ? 1.3 : 0.2, ease: 'easeOut' })
+    animate(x, -500, { duration: fromButton ? 1.3 : 0.3, ease: 'easeOut' })
   }
 
   function handleDragEnd(_, info) {
