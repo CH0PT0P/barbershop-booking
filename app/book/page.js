@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
-
+import { ArrowLeft } from 'lucide-react'
 
 const PAL = {
   bg:      '#F1E8D2',
@@ -126,15 +126,19 @@ const ICONS = {
   mullet: MulletIcon,
 }
 
-function SwipeableItem({ uid, onRemove, children }) {
+function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, price }) {
   const x = useMotionValue(0)
   const opacity = useTransform(x, [-120, -60, 0], [0, 0.3, 1])
   const [removing, setRemoving] = useState(false)
 
+  function triggerRemove() {
+    setRemoving(true)
+    animate(x, -500, { duration: 0.2, ease: 'easeOut' })
+  }
+
   function handleDragEnd(_, info) {
     if (info.offset.x < -80) {
-      setRemoving(true)
-      animate(x, -500, { duration: 0.2, ease: 'easeOut' })
+      triggerRemove()
     } else {
       animate(x, 0, { type: 'spring', stiffness: 500, damping: 35 })
     }
@@ -144,7 +148,7 @@ function SwipeableItem({ uid, onRemove, children }) {
     <AnimatePresence onExitComplete={() => onRemove(uid)}>
       {!removing && (
         <motion.div
-          exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+          exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
           style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}
         >
@@ -163,7 +167,40 @@ function SwipeableItem({ uid, onRemove, children }) {
             style={{ x, opacity, position: 'relative', zIndex: 1 }}
             onDragEnd={handleDragEnd}
           >
-            {children}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              background: PAL.card, borderRadius: 16, padding: '10px 12px',
+              border: '0.5px solid rgba(31,26,20,0.10)',
+            }}>
+              <div style={{
+                width: 38, height: 38, borderRadius: 11,
+                background: accent + '2E',
+                border: `1px solid ${accent}55`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Icon size={26} color={PAL.ink}/>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontFamily: 'var(--font-serif)', fontSize: 18,
+                  color: PAL.ink, letterSpacing: -0.2,
+                }}>{name}</div>
+                <div style={{
+                  fontFamily: '-apple-system, system-ui, sans-serif',
+                  fontSize: 11, color: PAL.ink3, marginTop: 2,
+                }}>{duration} min · ${price}</div>
+              </div>
+              <button
+                onClick={triggerRemove}
+                style={{
+                  border: 0, background: 'transparent', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center',
+                  padding: '4px 0 0', flexShrink: 0,
+                }}>
+                <ArrowLeft size={16} color={PAL.ink3}/>
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}
@@ -375,41 +412,16 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
               const Icon = ICONS[b.id]
               const accent = SERVICES.find(s => s.id === b.id)?.accent || PAL.terra
               return (
-                <SwipeableItem key={b.uid} uid={b.uid} onRemove={onRemove}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    background: PAL.card, borderRadius: 16, padding: '10px 12px',
-                    border: '0.5px solid rgba(31,26,20,0.10)',
-                  }}>
-                    <div style={{
-                      width: 38, height: 38, borderRadius: 11,
-                      background: accent + '2E',
-                      border: `1px solid ${accent}55`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0,
-                    }}>
-                      <Icon size={26} color={PAL.ink}/>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontFamily: 'var(--font-serif)', fontSize: 18,
-                        color: PAL.ink, letterSpacing: -0.2,
-                      }}>{b.name}</div>
-                      <div style={{
-                        fontFamily: '-apple-system, system-ui, sans-serif',
-                        fontSize: 11, color: PAL.ink3, marginTop: 2,
-                      }}>{b.duration} min · ${b.price}</div>
-                    </div>
-                    <button
-                      onClick={() => onRemove(b.uid)}
-                      style={{
-                        border: 0, background: 'transparent', cursor: 'pointer',
-                        fontFamily: '-apple-system, system-ui, sans-serif',
-                        fontSize: 11, color: PAL.ink3,
-                        textDecoration: 'underline', padding: '4px 0 0',
-                      }}>remove</button>
-                  </div>
-                </SwipeableItem>
+                <SwipeableItem
+                  key={b.uid}
+                  uid={b.uid}
+                  onRemove={onRemove}
+                  accent={accent}
+                  icon={Icon}
+                  name={b.name}
+                  duration={b.duration}
+                  price={b.price}
+                />
               )
             })}
 
@@ -440,12 +452,10 @@ export default function BookPage() {
   const [bookings, setBookings] = useState([])
   const [open, setOpen] = useState(false)
   const uidRef = useRef(1)
+
   useEffect(() => {
-    const preventDefault = (e) => e.preventDefault()
     document.body.style.overscrollBehavior = 'none'
-    return () => {
-      document.body.style.overscrollBehavior = ''
-    }
+    return () => { document.body.style.overscrollBehavior = '' }
   }, [])
 
   function add(service) {
@@ -493,7 +503,6 @@ export default function BookPage() {
       color: PAL.ink,
       overflow: 'hidden',
     }}>
-      {/* Paper grain */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: 'radial-gradient(rgba(31,26,20,0.06) 1px, transparent 1px)',
@@ -508,7 +517,6 @@ export default function BookPage() {
         display: 'flex',
         flexDirection: 'column',
       }}>
-        {/* Header */}
         <div style={{ padding: '0 4px 12px', position: 'relative', flexShrink: 0 }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
                style={{ position: 'absolute', top: 4, right: 4, transform: 'rotate(8deg)' }}>
@@ -527,7 +535,6 @@ export default function BookPage() {
           }}>tap one for you, two for the kids, all of em —</div>
         </div>
 
-        {/* Sticker grid — fills remaining space */}
         <div style={{
           flex: 1,
           display: 'grid',
