@@ -2,6 +2,8 @@
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { useSwipeable } from 'react-swipeable'
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
+
 
 const PAL = {
   bg:      '#F1E8D2',
@@ -125,13 +127,41 @@ const ICONS = {
 }
 
 function SwipeableItem({ uid, onRemove, children }) {
-  const handlers = useSwipeable({
-    onSwipedLeft: () => onRemove(uid),
-    trackMouse: false,
-    touchEventOptions: { passive: true },
-    delta: 50,
-  })
-  return <div {...handlers}>{children}</div>
+  const x = useMotionValue(0)
+  const opacity = useTransform(x, [-100, -50, 0], [0, 0.5, 1])
+  const background = useTransform(x, [-100, 0], ['#DC343B', PAL.card])
+
+  function handleDragEnd(_, info) {
+    if (info.offset.x < -80) {
+      animate(x, -500, { duration: 0.3 })
+      setTimeout(() => onRemove(uid), 300)
+    } else {
+      animate(x, 0, { type: 'spring', stiffness: 400, damping: 30 })
+    }
+  }
+
+  return (
+    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}>
+      {/* Red delete background */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: '#DC343B',
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+        paddingRight: 20, borderRadius: 16,
+      }}>
+        <span style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>Remove</span>
+      </div>
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -120, right: 0 }}
+        dragElastic={0.1}
+        style={{ x, opacity, position: 'relative', zIndex: 1 }}
+        onDragEnd={handleDragEnd}
+      >
+        {children}
+      </motion.div>
+    </div>
+  )
 }
 
 function StickerCard({ service, count, onAdd }) {
@@ -250,15 +280,17 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
 
   return (
     <div {...drawerSwipe} style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30 }}>
-      <div style={{
-        background: PAL.paper,
-        borderTopLeftRadius: 26, borderTopRightRadius: 26,
-        boxShadow: '0 -10px 30px rgba(31,26,20,0.18)',
-        borderTop: '0.5px solid rgba(31,26,20,0.12)',
-        overflow: 'hidden',
-        maxHeight: open ? 400 : 110,
-        transition: 'max-height 0.32s cubic-bezier(.2,.7,.2,1)',
-      }}>
+      <motion.div
+        animate={{ maxHeight: open ? 400 : 110 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+        style={{
+          background: PAL.paper,
+          borderTopLeftRadius: 26, borderTopRightRadius: 26,
+          boxShadow: '0 -10px 30px rgba(31,26,20,0.18)',
+          borderTop: '0.5px solid rgba(31,26,20,0.12)',
+          overflow: 'hidden',
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: 2 }}>
           <div style={{ width: 38, height: 5, borderRadius: 99, background: 'rgba(31,26,20,0.25)' }}/>
         </div>
@@ -321,14 +353,16 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
         </div>
 
         {!empty && (
-          <div style={{
-            padding: '4px 16px 18px',
-            display: 'flex', flexDirection: 'column', gap: 8,
-            opacity: open ? 1 : 0,
-            transition: 'opacity 0.22s',
-            pointerEvents: open ? 'auto' : 'none',
-            maxHeight: 280, overflowY: 'auto',
-          }}>
+          <motion.div
+            animate={{ opacity: open ? 1 : 0 }}
+            transition={{ duration: 0.22 }}
+            style={{
+              padding: '4px 16px 18px',
+              display: 'flex', flexDirection: 'column', gap: 8,
+              pointerEvents: open ? 'auto' : 'none',
+              maxHeight: 280, overflowY: 'auto',
+            }}
+          >
             {bookings.map((b) => {
               const Icon = ICONS[b.id]
               const accent = SERVICES.find(s => s.id === b.id)?.accent || PAL.terra
@@ -386,9 +420,9 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
                   fontSize: 12, color: PAL.ink3, textDecoration: 'underline',
                 }}>clear all</button>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }
