@@ -329,7 +329,7 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
   useEffect(() => {
     controls.start({
       height: open ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT,
-      transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+      transition: { type: 'spring', stiffness: 400, damping: 40, mass: 1 }
     })
   }, [open])
 
@@ -342,12 +342,12 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
         setOpen(false)
         controls.start({
           height: COLLAPSED_HEIGHT,
-          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+          transition: { type: 'spring', stiffness: 400, damping: 40, mass: 1 }
         })
       } else {
         controls.start({
           height: EXPANDED_HEIGHT,
-          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+          transition: { type: 'spring', stiffness: 400, damping: 40, mass: 1 }
         })
       }
     } else {
@@ -355,17 +355,17 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
         setOpen(true)
         controls.start({
           height: EXPANDED_HEIGHT,
-          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+          transition: { type: 'spring', stiffness: 400, damping: 40, mass: 1 }
         })
       } else {
         controls.start({
           height: COLLAPSED_HEIGHT,
-          transition: { type: 'spring', stiffness: 350, damping: 40, mass: 1 }
+          transition: { type: 'spring', stiffness: 400, damping: 40, mass: 1 }
         })
       }
     }
     // Reset y position
-    animate(y, 0, { type: 'spring', stiffness: 350, damping: 40, mass: 1 })
+    animate(y, 0, { type: 'spring', stiffness: 400, damping: 40, mass: 1 })
   }
 
   return (
