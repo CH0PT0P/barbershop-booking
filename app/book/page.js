@@ -452,16 +452,16 @@ export default function BookPage() {
   }
 
   const countById = (id) => bookings.filter(b => b.id === id).length
-  const padBottom = bookings.length === 0 ? 120 : (open ? 460 : 120)
+  const padBottom = 0
 
   return (
     <main style={{
-      minHeight: '100vh',
+      height: '100vh',
       backgroundColor: PAL.bg,
       fontFamily: '-apple-system, system-ui, sans-serif',
       color: PAL.ink,
       position: 'relative',
-      overflowX: 'hidden',
+      overflow: 'hidden',
     }}>
       {/* Paper grain texture */}
       <div style={{
@@ -473,8 +473,7 @@ export default function BookPage() {
 
       <div style={{
         position: 'relative', zIndex: 1,
-        padding: `54px 20px ${padBottom}px`,
-        transition: 'padding-bottom 0.32s cubic-bezier(.2,.7,.2,1)',
+        padding: '44px 20px 0px',
       }}>
         {/* Header */}
         <div style={{ padding: '0 4px 16px', position: 'relative' }}>
