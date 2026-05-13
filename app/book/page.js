@@ -145,41 +145,40 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
   }
 
   async function animateOut() {
-    setRemoving(true)
-    // 1. capture current height
-    const h = ref.current?.offsetHeight || 60
-    setHeight(h)
-    // 2. slide out horizontally
-    await controls.start({
-      x: '-100%',
-      transition: snappySpring,
-    })
-    // 3. collapse height + fade
-    await controls.start({
-      height: 0,
-      opacity: 0,
-      transition: { duration: 0.2, ease: 'easeIn' },
-    })
-    onRemove(uid)
+  setRemoving(true)
+  const h = ref.current?.offsetHeight || 60
+  setHeight(h)
+  await controls.start({
+    x: '-100%',
+    height: 0,
+    opacity: 0,
+    transition: {
+      x: snappySpring,
+      height: { duration: 0.2, ease: 'easeIn', delay: 0.08 },
+      opacity: { duration: 0.15, ease: 'easeIn', delay: 0.08 },
+    },
+  })
+  onRemove(uid)
+}
+
+async function triggerRemove() {
+  await animateOut()
+}
+
+function handleDragEnd(_, info) {
+  const offset = info.offset.x
+  const velocity = info.velocity.x
+
+  if (velocity < -VELOCITY_THRESHOLD || offset < -DISMISS_THRESHOLD) {
+    animateOut()
+  } else if (offset < -SWIPE_THRESHOLD) {
+    setRevealed(true)
+    controls.start({ x: -80, transition: snappySpring })
+  } else {
+    setRevealed(false)
+    controls.start({ x: 0, transition: snappySpring })
   }
-
-  async function triggerRemove() {
-    await animateOut()
-  }
-
-  function handleDragEnd(_, info) {
-    const offset = info.offset.x
-    const velocity = info.velocity.x
-
-    if (velocity < -VELOCITY_THRESHOLD || offset < -DISMISS_THRESHOLD) {
-      animateOut()
-    } else if (offset < -SWIPE_THRESHOLD) {
-      setRevealed(true)
-      controls.start({ x: -80, transition: snappySpring })
-    } else {
-      setRevealed(false)
-      controls.start({ x: 0, transition: snappySpring })
-    }
+}
   }
 
   return (
