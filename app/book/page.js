@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
+import { useSwipeable } from 'react-swipeable'
 
 const PAL = {
   bg:      '#F1E8D2',
@@ -235,8 +236,15 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
   const count = bookings.length
   const empty = count === 0
 
+    const drawerSwipe = useSwipeable({
+    onSwipedUp: () => { if (!empty) setOpen(true) },
+    onSwipedDown: () => setOpen(false),
+    trackMouse: false,
+    touchEventOptions: { passive: true },
+  })
+
   return (
-    <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30 }}>
+    <div {...drawerSwipe} style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30 }}>
       <div style={{
         background: PAL.paper,
         borderTopLeftRadius: 26, borderTopRightRadius: 26,
@@ -322,11 +330,17 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
             {bookings.map((b) => {
               const Icon = ICONS[b.id]
               const accent = SERVICES.find(s => s.id === b.id)?.accent || PAL.terra
+              const swipeItem = useSwipeable({
+                onSwipedLeft: () => onRemove(b.uid),
+                trackMouse: false,
+                touchEventOptions: { passive: true },
+              })
               return (
-                <div key={b.uid} style={{
+                <div {...swipeItem} key={b.uid} style={{
                   display: 'flex', alignItems: 'center', gap: 12,
                   background: PAL.card, borderRadius: 16, padding: '10px 12px',
                   border: '0.5px solid rgba(31,26,20,0.10)',
+                  transition: 'transform 0.2s',
                 }}>
                   <div style={{
                     width: 38, height: 38, borderRadius: 11,
