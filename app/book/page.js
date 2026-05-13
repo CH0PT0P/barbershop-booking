@@ -320,134 +320,161 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
   const count = bookings.length
   const empty = count === 0
 
-  const drawerSwipe = useSwipeable({
-    onSwipedUp: () => { if (!empty) setOpen(true) },
-    onSwipedDown: () => setOpen(false),
-    trackMouse: false,
-    touchEventOptions: { passive: false },
-    preventScrollOnSwipe: true,
-    delta: 10,
-  })
+  const COLLAPSED_HEIGHT = 110
+  const EXPANDED_HEIGHT = 400
+  const y = useMotionValue(0)
+
+  function handleDragEnd(_, info) {
+    const velocity = info.velocity.y
+    const offset = info.offset.y
+
+    if (open) {
+      // Currently open — close if dragged down enough or fast enough
+      if (offset > 60 || velocity > 400) {
+        setOpen(false)
+        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+      } else {
+        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+      }
+    } else {
+      // Currently closed — open if dragged up enough or fast enough
+      if (!empty && (offset < -60 || velocity < -400)) {
+        setOpen(true)
+        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+      } else {
+        animate(y, 0, { type: 'spring', stiffness: 400, damping: 40 })
+      }
+    }
+  }
 
   return (
-    <div {...drawerSwipe} style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30 }}>
+    <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30 }}>
       <motion.div
-        animate={{ maxHeight: open ? 400 : 110 }}
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.2, bottom: 0.2 }}
+        style={{ y }}
+        onDragEnd={handleDragEnd}
+        animate={{ height: open ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT }}
         transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-        style={{
+      >
+        <div style={{
           background: PAL.paper,
           borderTopLeftRadius: 26, borderTopRightRadius: 26,
           boxShadow: '0 -10px 30px rgba(31,26,20,0.18)',
           borderTop: '0.5px solid rgba(31,26,20,0.12)',
           overflow: 'hidden',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: 2 }}>
-          <div style={{ width: 38, height: 5, borderRadius: 99, background: 'rgba(31,26,20,0.25)' }}/>
-        </div>
-
-        <div
-          onClick={() => !empty && setOpen(!open)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '8px 18px 10px', cursor: empty ? 'default' : 'pointer',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {empty ? (
-              <div style={{ fontFamily: 'var(--font-hand)', fontSize: 20, color: PAL.ink2 }}>
-                tap a sticker to get started —
-              </div>
-            ) : (
-              <>
-                <div style={{
-                  fontFamily: '-apple-system, system-ui, sans-serif',
-                  fontSize: 11, fontWeight: 700,
-                  letterSpacing: 1.6, color: PAL.terra, textTransform: 'uppercase',
-                }}>Booking</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
-                  <div style={{
-                    fontFamily: 'var(--font-serif)', fontStyle: 'italic',
-                    fontSize: 26, color: PAL.ink, letterSpacing: -0.4, lineHeight: 1,
-                  }}>${total}</div>
-                  <div style={{
-                    fontFamily: '-apple-system, system-ui, sans-serif',
-                    fontSize: 12, color: PAL.ink2,
-                  }}>· {count} {count === 1 ? 'service' : 'services'} · {totalMin} min</div>
-                </div>
-              </>
-            )}
+          height: '100%',
+        }}>
+          {/* Handle */}
+          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: 2 }}>
+            <div style={{ width: 38, height: 5, borderRadius: 99, background: 'rgba(31,26,20,0.25)' }}/>
           </div>
 
-          <button
-            onClick={(e) => { e.stopPropagation(); if (!empty) onContinue() }}
+          {/* Header */}
+          <div
             style={{
-              border: 0, cursor: empty ? 'default' : 'pointer',
-              background: empty ? 'rgba(31,26,20,0.08)' : PAL.ink,
-              color: empty ? PAL.ink3 : PAL.paper,
-              fontFamily: '-apple-system, system-ui, sans-serif',
-              fontWeight: 600, fontSize: 14,
-              padding: '12px 18px', borderRadius: 999,
-              display: 'flex', alignItems: 'center', gap: 8,
-              boxShadow: empty ? 'none' : '0 6px 14px rgba(31,26,20,0.22)',
-              transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '8px 18px 10px',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
-            {empty ? 'Pick a service' : count === 1 ? 'Continue' : count === 2 ? 'Book both' : `Book all ${count}`}
-            {!empty && (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {!empty && (
-          <motion.div
-            animate={{ opacity: open ? 1 : 0 }}
-            transition={{ duration: 0.22 }}
-            style={{
-              padding: '4px 16px 18px',
-              display: 'flex', flexDirection: 'column', gap: 8,
-              pointerEvents: open ? 'auto' : 'none',
-              maxHeight: 280, overflowY: 'auto',
-            }}
-          >
-            {bookings.map((b) => {
-              const Icon = ICONS[b.id]
-              const accent = SERVICES.find(s => s.id === b.id)?.accent || PAL.terra
-              return (
-                <SwipeableItem
-                  key={b.uid}
-                  uid={b.uid}
-                  onRemove={onRemove}
-                  accent={accent}
-                  icon={Icon}
-                  name={b.name}
-                  duration={b.duration}
-                  price={b.price}
-                />
-              )
-            })}
-
-            <div style={{
-              display: 'flex', justifyContent: 'space-between',
-              alignItems: 'center', marginTop: 6, padding: '0 4px',
-            }}>
-              <div style={{
-                fontFamily: 'var(--font-hand)', fontSize: 16, color: PAL.ink2,
-              }}>tap a sticker to add another →</div>
-              <button
-                onClick={onClear}
-                style={{
-                  border: 0, background: 'transparent', cursor: 'pointer',
-                  fontFamily: '-apple-system, system-ui, sans-serif',
-                  fontSize: 12, color: PAL.ink3, textDecoration: 'underline',
-                }}>clear all</button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {empty ? (
+                <div style={{ fontFamily: 'var(--font-hand)', fontSize: 20, color: PAL.ink2 }}>
+                  tap a sticker to get started —
+                </div>
+              ) : (
+                <>
+                  <div style={{
+                    fontFamily: '-apple-system, system-ui, sans-serif',
+                    fontSize: 11, fontWeight: 700,
+                    letterSpacing: 1.6, color: PAL.terra, textTransform: 'uppercase',
+                  }}>Booking</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
+                    <div style={{
+                      fontFamily: 'var(--font-serif)', fontStyle: 'italic',
+                      fontSize: 26, color: PAL.ink, letterSpacing: -0.4, lineHeight: 1,
+                    }}>${total}</div>
+                    <div style={{
+                      fontFamily: '-apple-system, system-ui, sans-serif',
+                      fontSize: 12, color: PAL.ink2,
+                    }}>· {count} {count === 1 ? 'service' : 'services'} · {totalMin} min</div>
+                  </div>
+                </>
+              )}
             </div>
-          </motion.div>
-        )}
+
+            <button
+              onClick={(e) => { e.stopPropagation(); if (!empty) onContinue() }}
+              style={{
+                border: 0, cursor: empty ? 'default' : 'pointer',
+                background: empty ? 'rgba(31,26,20,0.08)' : PAL.ink,
+                color: empty ? PAL.ink3 : PAL.paper,
+                fontFamily: '-apple-system, system-ui, sans-serif',
+                fontWeight: 600, fontSize: 14,
+                padding: '12px 18px', borderRadius: 999,
+                display: 'flex', alignItems: 'center', gap: 8,
+                boxShadow: empty ? 'none' : '0 6px 14px rgba(31,26,20,0.22)',
+                transition: 'all 0.2s',
+              }}
+            >
+              {empty ? 'Pick a service' : count === 1 ? 'Continue' : count === 2 ? 'Book both' : `Book all ${count}`}
+              {!empty && (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Expanded list */}
+          {!empty && (
+            <motion.div
+              animate={{ opacity: open ? 1 : 0 }}
+              transition={{ duration: 0.22 }}
+              style={{
+                padding: '4px 16px 18px',
+                display: 'flex', flexDirection: 'column', gap: 8,
+                pointerEvents: open ? 'auto' : 'none',
+                maxHeight: 280, overflowY: 'auto',
+              }}
+            >
+              {bookings.map((b) => {
+                const Icon = ICONS[b.id]
+                const accent = SERVICES.find(s => s.id === b.id)?.accent || PAL.terra
+                return (
+                  <SwipeableItem
+                    key={b.uid}
+                    uid={b.uid}
+                    onRemove={onRemove}
+                    accent={accent}
+                    icon={Icon}
+                    name={b.name}
+                    duration={b.duration}
+                    price={b.price}
+                  />
+                )
+              })}
+
+              <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                alignItems: 'center', marginTop: 6, padding: '0 4px',
+              }}>
+                <div style={{
+                  fontFamily: 'var(--font-hand)', fontSize: 16, color: PAL.ink2,
+                }}>tap a sticker to add another →</div>
+                <button
+                  onClick={onClear}
+                  style={{
+                    border: 0, background: 'transparent', cursor: 'pointer',
+                    fontFamily: '-apple-system, system-ui, sans-serif',
+                    fontSize: 12, color: PAL.ink3, textDecoration: 'underline',
+                  }}>clear all</button>
+              </div>
+            </motion.div>
+          )}
+        </div>
       </motion.div>
     </div>
   )
