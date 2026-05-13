@@ -128,39 +128,46 @@ const ICONS = {
 
 function SwipeableItem({ uid, onRemove, children }) {
   const x = useMotionValue(0)
-  const opacity = useTransform(x, [-100, -50, 0], [0, 0.5, 1])
-  const background = useTransform(x, [-100, 0], ['#DC343B', PAL.card])
+  const opacity = useTransform(x, [-120, -60, 0], [0, 0.3, 1])
+  const [removing, setRemoving] = useState(false)
 
   function handleDragEnd(_, info) {
     if (info.offset.x < -80) {
-      animate(x, -500, { duration: 0.3 })
-      setTimeout(() => onRemove(uid), 300)
+      setRemoving(true)
+      animate(x, -500, { duration: 0.2, ease: 'easeOut' })
     } else {
-      animate(x, 0, { type: 'spring', stiffness: 400, damping: 30 })
+      animate(x, 0, { type: 'spring', stiffness: 500, damping: 35 })
     }
   }
 
   return (
-    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}>
-      {/* Red delete background */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: '#DC343B',
-        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-        paddingRight: 20, borderRadius: 16,
-      }}>
-        <span style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>Remove</span>
-      </div>
-      <motion.div
-        drag="x"
-        dragConstraints={{ left: -120, right: 0 }}
-        dragElastic={0.1}
-        style={{ x, opacity, position: 'relative', zIndex: 1 }}
-        onDragEnd={handleDragEnd}
-      >
-        {children}
-      </motion.div>
-    </div>
+    <AnimatePresence onExitComplete={() => onRemove(uid)}>
+      {!removing && (
+        <motion.div
+          exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}
+        >
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: '#DC343B',
+            display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+            paddingRight: 20, borderRadius: 16,
+          }}>
+            <span style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>Remove</span>
+          </div>
+          <motion.div
+            drag="x"
+            dragConstraints={{ left: -120, right: 0 }}
+            dragElastic={0.05}
+            style={{ x, opacity, position: 'relative', zIndex: 1 }}
+            onDragEnd={handleDragEnd}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
