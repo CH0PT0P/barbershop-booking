@@ -326,7 +326,7 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
     trackMouse: false,
     touchEventOptions: { passive: false },
     preventScrollOnSwipe: true,
-    delta: 30,
+    delta: 10,
   })
 
   return (
