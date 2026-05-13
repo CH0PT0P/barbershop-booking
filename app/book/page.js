@@ -149,6 +149,8 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
       setHeight(ref.current.getBoundingClientRect().height)
     }
     setRemoving(true)
+    // Notify parent immediately so total/counts update in sync with the animation
+    onRemove(uid)
     await controls.start({
       x: '-100%',
       opacity: 0,
@@ -162,7 +164,6 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
       height: 0,
       transition: { duration: 0.2, ease: 'easeIn' },
     })
-    onRemove(uid)
   }
 
   async function triggerRemove() {
@@ -548,6 +549,7 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
 export default function BookPage() {
   const router = useRouter()
   const [bookings, setBookings] = useState([])
+  const [removingIds, setRemovingIds] = useState(new Set())
   const [open, setOpen] = useState(false)
   const uidRef = useRef(1)
 
