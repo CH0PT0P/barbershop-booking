@@ -128,10 +128,9 @@ const ICONS = {
 
 function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, price }) {
   const controls = useAnimationControls()
-  const [removing, setRemoving] = useState(false)
-  const [revealed, setRevealed] = useState(false)
-  const [height, setHeight] = useState('auto')
   const ref = useRef(null)
+  const [removing, setRemoving] = useState(false)
+  const [height, setHeight] = useState('auto')
 
   const SWIPE_THRESHOLD = 80
   const DISMISS_THRESHOLD = 200
@@ -145,49 +144,55 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
   }
 
   async function animateOut() {
-  setRemoving(true)
-  const h = ref.current?.offsetHeight || 60
-  setHeight(h)
-  await controls.start({
-    x: '-100%',
-    height: 0,
-    opacity: 0,
-    transition: {
-      x: snappySpring,
-      height: { duration: 0.2, ease: 'easeIn', delay: 0.08 },
-      opacity: { duration: 0.15, ease: 'easeIn', delay: 0.08 },
-    },
-  })
-  onRemove(uid)
-}
-
-async function triggerRemove() {
-  await animateOut()
-}
-
-function handleDragEnd(_, info) {
-  const offset = info.offset.x
-  const velocity = info.velocity.x
-
-  if (velocity < -VELOCITY_THRESHOLD || offset < -DISMISS_THRESHOLD) {
-    animateOut()
-  } else if (offset < -SWIPE_THRESHOLD) {
-    setRevealed(true)
-    controls.start({ x: -80, transition: snappySpring })
-  } else {
-    setRevealed(false)
-    controls.start({ x: 0, transition: snappySpring })
+    // Capture current height before collapsing
+    if (ref.current) {
+      setHeight(ref.current.getBoundingClientRect().height)
+    }
+    setRemoving(true)
+    await controls.start({
+      x: '-100%',
+      opacity: 0,
+      transition: {
+        x: snappySpring,
+        opacity: { duration: 0.15, ease: 'easeIn', delay: 0.08 },
+      },
+    })
+    // Collapse height after slide-out
+    await controls.start({
+      height: 0,
+      transition: { duration: 0.2, ease: 'easeIn' },
+    })
+    onRemove(uid)
   }
-}
+
+  async function triggerRemove() {
+    await animateOut()
+  }
+
+  function handleDragEnd(_, info) {
+    const offset = info.offset.x
+    const velocity = info.velocity.x
+
+    if (velocity < -VELOCITY_THRESHOLD || offset < -DISMISS_THRESHOLD) {
+      animateOut()
+    } else if (offset < -SWIPE_THRESHOLD) {
+      controls.start({ x: -80, transition: snappySpring })
+    } else {
+      controls.start({ x: 0, transition: snappySpring })
+    }
   }
 
   return (
-    <div ref={ref} style={{
-      position: 'relative',
-      borderRadius: 16,
-      overflow: 'hidden',
-      height: removing ? height : 'auto',
-    }}>
+    <motion.div
+      ref={ref}
+      animate={controls}
+      style={{
+        position: 'relative',
+        borderRadius: 16,
+        overflow: 'hidden',
+        height: removing ? height : 'auto',
+      }}
+    >
       {/* Red delete background */}
       <div style={{
         position: 'absolute', inset: 0,
@@ -210,7 +215,6 @@ function handleDragEnd(_, info) {
         dragConstraints={{ left: -300, right: 0 }}
         dragElastic={{ left: 0.1, right: 0.3 }}
         dragMomentum={false}
-        animate={controls}
         onDragEnd={handleDragEnd}
         style={{ position: 'relative', zIndex: 1 }}
       >
@@ -253,7 +257,7 @@ function handleDragEnd(_, info) {
           </button>
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -368,7 +372,6 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
   const controls = useAnimationControls()
   const y = useMotionValue(0)
 
-  // Sync animation when open state changes externally
   useEffect(() => {
     controls.start({
       height: open ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT,
@@ -407,7 +410,6 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
         })
       }
     }
-    // Reset y position
     animate(y, 0, { type: 'spring', stiffness: 400, damping: 40, mass: 1 })
   }
 
@@ -579,12 +581,14 @@ export default function BookPage() {
 
   function handleContinue() {
     if (bookings.length === 0) return
-    localStorage.setItem('selectedServices', JSON.stringify(bookings))
-    localStorage.setItem('selectedService', JSON.stringify({
-      name: bookings[0].name,
-      price: bookings[0].price,
-      duration: bookings[0].duration,
-    }))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedServices', JSON.stringify(bookings))
+      localStorage.setItem('selectedService', JSON.stringify({
+        name: bookings[0].name,
+        price: bookings[0].price,
+        duration: bookings[0].duration,
+      }))
+    }
     router.push('/book/date')
   }
 
