@@ -22,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${instrumentSerif.variable} ${caveat.variable}`}>
-      <body>{children}</body>
+      <body style={{ overscrollBehavior: 'none', position: 'fixed', width: '100%', height: '100%' }}>{children}</body>
     </html>
   )
 }
