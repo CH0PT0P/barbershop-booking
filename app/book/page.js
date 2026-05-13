@@ -135,7 +135,7 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
   function triggerRemove(fromButton = false) {
     setButtonTriggered(fromButton)
     setRemoving(true)
-    animate(x, -500, { duration: fromButton ? 1.0 : 0.2, ease: 'easeOut' })
+    animate(x, -500, { duration: fromButton ? 1.3 : 0.2, ease: 'easeOut' })
   }
 
   function handleDragEnd(_, info) {
@@ -151,7 +151,7 @@ function SwipeableItem({ uid, onRemove, accent, icon: Icon, name, duration, pric
       {!removing && (
         <motion.div
           exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: buttonTriggered ? 0.5 : 0.25, ease: 'easeOut' }}
+          transition={{ duration: buttonTriggered ? 1.05 : 0.25, ease: 'easeOut' }}
           style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}
         >
           <div style={{
