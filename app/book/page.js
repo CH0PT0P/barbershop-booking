@@ -433,6 +433,13 @@ export default function BookPage() {
   const [bookings, setBookings] = useState([])
   const [open, setOpen] = useState(false)
   const uidRef = useRef(1)
+  useEffect(() => {
+    const preventDefault = (e) => e.preventDefault()
+    document.body.style.overscrollBehavior = 'none'
+    return () => {
+      document.body.style.overscrollBehavior = ''
+    }
+  }, [])
 
   function add(service) {
     const uid = uidRef.current++
