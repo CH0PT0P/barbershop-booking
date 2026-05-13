@@ -394,7 +394,7 @@ function BookingDrawer({ bookings, onRemove, onClear, open, setOpen, onContinue 
               transition: 'all 0.2s',
             }}
           >
-            {empty ? 'Pick a service' : (count > 1 ? `Book all ${count}` : 'Continue')}
+            {empty ? 'Pick a service' : count === 1 ? 'Continue' : count === 2 ? 'Book both' : `Book all ${count}`}
             {!empty && (
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
