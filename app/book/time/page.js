@@ -166,10 +166,9 @@ export default function TimePage() {
       }
     }
 
-    if (conflictEnd !== null) {
-  // Jump straight to where the conflict ends
-  min = conflictEnd
-}
+  if (conflictEnd !== null) {
+      // Jump straight to where the conflict ends
+      min = conflictEnd
     } else {
       // Slot is clean — add it
       generated.push({
