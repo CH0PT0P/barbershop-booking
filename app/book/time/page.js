@@ -99,70 +99,93 @@ export default function TimePage() {
   }, [])
 
   async function buildSlots(date, services) {
-    setLoading(true)
-    const totalDuration = services.reduce((s, b) => s + b.duration, 0)
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
-    const dayOfWeek = date.getDay()
+  setLoading(true)
+  const totalDuration = services.reduce((s, b) => s + b.duration, 0)
+  const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
+  const dayOfWeek = date.getDay()
 
-    const { data: override } = await supabase
-      .from('date_overrides').select('*').eq('date', dateStr).single()
-    const { data: weekly } = await supabase
-      .from('availability').select('*').eq('day_of_week', dayOfWeek).single()
+  const { data: override } = await supabase
+    .from('date_overrides').select('*').eq('date', dateStr).single()
+  const { data: weekly } = await supabase
+    .from('availability').select('*').eq('day_of_week', dayOfWeek).single()
 
-    let startTime, endTime, isBlocked
-    if (override) {
-      isBlocked = override.is_blocked
-      startTime = override.start_time
-      endTime = override.end_time
-    } else if (weekly) {
-      isBlocked = weekly.is_blocked
-      startTime = weekly.start_time
-      endTime = weekly.end_time
-    }
+  let startTime, endTime, isBlocked, bufferMinutes = 0
+  if (override) {
+    isBlocked = override.is_blocked
+    startTime = override.start_time
+    endTime = override.end_time
+  } else if (weekly) {
+    isBlocked = weekly.is_blocked
+    startTime = weekly.start_time
+    endTime = weekly.end_time
+    bufferMinutes = weekly.buffer_minutes || 0
+  }
 
-    if (isBlocked || !startTime || !endTime) {
-      setSlots([])
-      setLoading(false)
-      return
-    }
+  if (isBlocked || !startTime || !endTime) {
+    setSlots([])
+    setLoading(false)
+    return
+  }
 
-    const { data: booked } = await supabase
-      .from('appointments').select('time, service')
-      .eq('date', dateStr).eq('status', 'booked')
+  const { data: booked } = await supabase
+    .from('appointments').select('time, service')
+    .eq('date', dateStr).eq('status', 'booked')
 
-    const blockedMinutes = new Set()
-    if (booked) {
-      booked.forEach(appt => {
-        const [h, m] = appt.time.split(':').map(Number)
-        const start = h * 60 + m
-        const dur = getServiceDuration(appt.service)
-        for (let i = start; i < start + dur; i++) blockedMinutes.add(i)
-      })
-    }
-
-    const [startH, startM] = startTime.split(':').map(Number)
-    const [endH, endM] = endTime.split(':').map(Number)
-    const startMin = startH * 60 + startM
-    const endMin = endH * 60 + endM
-    const BASE = 40
-
-    const generated = []
-    for (let min = startMin; min + totalDuration <= endMin; min += BASE) {
-      let conflict = false
-      for (let i = min; i < min + totalDuration; i++) {
-        if (blockedMinutes.has(i)) { conflict = true; break }
+  // Build a set of blocked minutes (existing appointments + buffer)
+  const blockedMinutes = new Set()
+  if (booked) {
+    booked.forEach(appt => {
+      const [h, m] = appt.time.split(':').map(Number)
+      const start = h * 60 + m
+      const dur = getServiceDuration(appt.service)
+      // Block the appointment itself + the buffer after it
+      for (let i = start; i < start + dur + bufferMinutes; i++) {
+        blockedMinutes.add(i)
       }
+    })
+  }
+
+  const [startH, startM] = startTime.split(':').map(Number)
+  const [endH, endM] = endTime.split(':').map(Number)
+  const startMin = startH * 60 + startM
+  const endMin = endH * 60 + endM
+
+  const generated = []
+  let min = startMin
+
+  while (min + totalDuration <= endMin) {
+    // Check if this slot is fully clear for the service duration
+    let conflictEnd = null
+    for (let i = min; i < min + totalDuration; i++) {
+      if (blockedMinutes.has(i)) {
+        // Find where this block of conflict ends
+        let end = i
+        while (blockedMinutes.has(end)) end++
+        conflictEnd = end
+        break
+      }
+    }
+
+    if (conflictEnd !== null) {
+      // Jump to end of conflict, snap to next 15-min mark
+      const snapped = Math.ceil(conflictEnd / 15) * 15
+      min = snapped
+    } else {
+      // Slot is clean — add it
       generated.push({
         key: `${Math.floor(min/60)}:${min%60}`,
         hour: Math.floor(min/60),
         min: min % 60,
         minutes: min,
-        available: !conflict,
+        available: true,
       })
+      min += 15
     }
-    setSlots(generated)
-    setLoading(false)
   }
+
+  setSlots(generated)
+  setLoading(false)
+}
 
   function getServiceDuration(service) {
     if (service === "Men's Cut") return 40
