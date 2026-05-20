@@ -167,9 +167,9 @@ export default function TimePage() {
     }
 
     if (conflictEnd !== null) {
-      // Jump to end of conflict, snap to next 15-min mark
-      const snapped = Math.ceil(conflictEnd / 15) * 15
-      min = snapped
+  // Jump straight to where the conflict ends
+  min = conflictEnd
+}
     } else {
       // Slot is clean — add it
       generated.push({
