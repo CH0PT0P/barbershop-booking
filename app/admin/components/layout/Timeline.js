@@ -20,8 +20,11 @@
 //   onSelectAppt  — called with the appointment object when a block is tapped
 //   onTapEmpty    — called with minutes-since-midnight when empty space is tapped
 
+'use client'
+
+import { useState, useEffect } from 'react'
 import { getServiceColor, getServiceDuration } from '../../../lib/serviceColors'
-import { timeStringToMinutes, fmtShort } from '../../../lib/time'
+import { timeStringToMinutes, fmtShort, todayString } from '../../../lib/time'
 
 const PX_PER_HOUR = 84
 const PX_PER_MIN  = PX_PER_HOUR / 60   // 1.4
@@ -40,7 +43,24 @@ function timeToTop(timeStr) {
   return (startMin - DAY_START * 60) * PX_PER_MIN
 }
 
-export default function Timeline({ appointments = [], loading = false, onSelectAppt, onTapEmpty }) {
+function nowMinutes() {
+  const d = new Date()
+  return d.getHours() * 60 + d.getMinutes()
+}
+
+export default function Timeline({ appointments = [], loading = false, onSelectAppt, onTapEmpty, viewDate }) {
+  const [currentMin, setCurrentMin] = useState(nowMinutes)
+
+  // Tick every minute so the line stays accurate.
+  useEffect(() => {
+    const id = setInterval(() => setCurrentMin(nowMinutes()), 60_000)
+    return () => clearInterval(id)
+  }, [])
+
+  const isToday     = viewDate === todayString()
+  const nowTop      = (currentMin - DAY_START * 60) * PX_PER_MIN
+  const showNowLine = isToday && currentMin >= DAY_START * 60 && currentMin <= DAY_END * 60
+
   // Tap on empty space: convert the Y position to a 15-min-snapped time.
   // e.currentTarget.getBoundingClientRect() accounts for scroll offset correctly
   // because both clientY and rect.top are in viewport coordinates.
@@ -103,6 +123,20 @@ export default function Timeline({ appointments = [], loading = false, onSelectA
             }}
           />
         ))}
+
+        {/* Current time indicator — only on today */}
+        {showNowLine && (
+          <div
+            className="absolute left-0 right-0 flex items-center pointer-events-none z-10"
+            style={{ top: nowTop }}
+          >
+            <div
+              className="flex-shrink-0 rounded-full bg-red-500"
+              style={{ width: 8, height: 8, marginLeft: -4 }}
+            />
+            <div className="flex-1" style={{ height: 1.5, background: '#ef4444' }} />
+          </div>
+        )}
 
         {/* Appointment blocks */}
         {appointments.map(appt => {

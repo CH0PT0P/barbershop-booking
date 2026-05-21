@@ -161,6 +161,7 @@ export default function DayPage() {
           loading={loading}
           onSelectAppt={setSelectedAppt}
           onTapEmpty={handleTapEmpty}
+          viewDate={viewDate}
         />
       </div>
 
