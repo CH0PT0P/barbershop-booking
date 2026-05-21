@@ -12,10 +12,10 @@
 
 import { useRef, useEffect, useLayoutEffect } from 'react'
 
-const ITEM_H  = 30                // px — height of each row
+const ITEM_H  = 40                // px — height of each row
 const VISIBLE = 3                 // rows shown at once
-const PAD     = Math.floor(VISIBLE / 2)   // = 2 rows of padding top + bottom
-const WHEEL_H = ITEM_H * VISIBLE  // = 220px total
+const PAD     = Math.floor(VISIBLE / 2)   // = 1 row of padding top + bottom
+const WHEEL_H = ITEM_H * VISIBLE  // = 120px total
 
 const HOURS   = [1,2,3,4,5,6,7,8,9,10,11,12]
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5)  // 0,5,10…55
