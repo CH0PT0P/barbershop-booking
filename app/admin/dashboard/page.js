@@ -604,7 +604,7 @@ export default function Dashboard() {
   const displayedClients = isSearching ? searchResults : clients
 
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-10">
+    <main className="min-h-screen bg-black text-white px-6 py-10 overflow-y-auto">
       <div className="max-w-2xl mx-auto">
 
         {/* Header */}
