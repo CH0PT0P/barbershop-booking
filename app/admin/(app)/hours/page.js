@@ -314,33 +314,28 @@ function OverridesTab({ overrides, onSave, onDelete }) {
           <div className="text-[11px] font-semibold uppercase tracking-[0.6px] text-muted mb-3">
             Scheduled changes
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-[6px]">
             {overrides.map(o => (
               <div
                 key={o.id}
                 className="
-                  flex items-center justify-between
-                  bg-white rounded-[16px] px-4 py-[14px]
+                  flex items-center gap-3
+                  bg-white rounded-[12px] px-4 py-[10px]
                   border-hairline border-[color:var(--color-hairline)]
                   shadow-card
                 "
               >
-                <div>
-                  <div className="text-[14px] font-semibold text-body">
-                    {formatLongDate(o.date)}
-                  </div>
-                  <div className="text-[12px] text-muted mt-[2px] tnum">
-                    {o.is_blocked
-                      ? 'Closed'
-                      : `${fmt(o.start_time)} – ${fmt(o.end_time)}`
-                    }
-                  </div>
+                <div className="text-[13px] font-semibold text-body flex-1">
+                  {formatLongDate(o.date)}
+                </div>
+                <div className="text-[12px] text-muted tnum">
+                  {o.is_blocked ? 'Closed' : `${fmt(o.start_time)} – ${fmt(o.end_time)}`}
                 </div>
                 <button
                   onClick={() => onDelete(o.id)}
-                  className="text-muted active:text-danger transition-colors pl-3"
+                  className="text-muted active:text-danger transition-colors pl-1"
                 >
-                  <Icon name="trash" size={17} />
+                  <Icon name="trash" size={15} />
                 </button>
               </div>
             ))}
