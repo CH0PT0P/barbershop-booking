@@ -1,5 +1,72 @@
 @import "tailwindcss";
 
+/* ─── Design tokens ──────────────────────────────────────────────────
+   These power the admin redesign. Use them via Tailwind classes like
+   `bg-pullman`, `text-sepia`, `border-hairline`, etc.
+   ──────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Brand */
+  --color-pullman: #553B08;
+  --color-sepia: #75420E;
+  --color-eggshell: #E9E5CD;
+  --color-eggshell-soft: #F4F1E2;
+  --color-silver: #AAAAAA;
+  --color-ink: #1A1A1A;
+
+  /* Semantic text */
+  --color-body: #181410;
+  --color-muted: #7A6F62;
+  --color-dim: #AAAAAA;
+
+  /* Lines */
+  --color-hairline: rgba(85, 59, 8, 0.10);
+  --color-divider: rgba(85, 59, 8, 0.07);
+
+  /* State */
+  --color-danger: #D43F2C;
+  --color-danger-soft: #FBEAE7;
+  --color-success: #3A8A4F;
+
+  /* Service colors — Men's Cut (blue) */
+  --color-mens-bg: #E5ECF8;
+  --color-mens-bar: #2C5BB3;
+  --color-mens-text: #1F4B96;
+  --color-mens-solid: #3B6CB3;
+
+  /* Service colors — Kids Cut (purple) */
+  --color-kids-bg: #EBE3F8;
+  --color-kids-bar: #6E3FC9;
+  --color-kids-text: #5A2EAE;
+  --color-kids-solid: #7E4DD8;
+
+  /* Service colors — Beard Trim (green) */
+  --color-beard-bg: #E2F1E8;
+  --color-beard-bar: #2D8A52;
+  --color-beard-text: #1F6B3D;
+  --color-beard-solid: #3D9A62;
+
+  /* Service colors — Mullet Trim (orange) */
+  --color-mullet-bg: #F8E6D4;
+  --color-mullet-bar: #C56312;
+  --color-mullet-text: #9E4E0B;
+  --color-mullet-solid: #D67423;
+
+  /* Radii */
+  --radius-pill: 999px;
+  --radius-tile: 12px;
+  --radius-btn: 14px;
+  --radius-card: 18px;
+  --radius-sheet: 28px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(85, 59, 8, 0.04);
+  --shadow-cta: 0 1px 2px rgba(85, 59, 8, 0.15);
+  --shadow-floating: 0 4px 12px rgba(85, 59, 8, 0.35);
+  --shadow-sheet: 0 -10px 40px rgba(0, 0, 0, 0.18);
+  --shadow-seg: 0 1px 2px rgba(85, 59, 8, 0.10);
+}
+
+/* ─── Base ───────────────────────────────────────────────────────── */
 html, body {
   overscroll-behavior: none;
   overscroll-behavior-y: none;
@@ -9,27 +76,22 @@ html, body {
   height: 100%;
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #FFFFFF;
+  color: var(--color-body);
+  font-family: -apple-system, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility: tabular numerals — for any clock time, phone, price, count */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Utility: hairline border (iOS-style 0.5px) */
+.border-hairline { border-width: 0.5px; }
+
+/* Wordmark uses the existing Instrument Serif font we already load */
+.wordmark {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-style: italic;
 }
