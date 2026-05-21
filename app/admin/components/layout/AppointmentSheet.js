@@ -11,9 +11,10 @@
 
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getServiceColor, getServiceDuration, getServicePrice } from '../../../lib/serviceColors'
-import { timeStringToMinutes, fmtShort, formatPhone } from '../../../lib/time'
+import { timeStringToMinutes, minutesToTimeString, fmtShort, formatPhone } from '../../../lib/time'
 import PrimaryButton from '../primitives/PrimaryButton'
 import GhostButton from '../primitives/GhostButton'
 import Icon from './Icon'
@@ -21,9 +22,17 @@ import Icon from './Icon'
 const SPRING = { type: 'spring', stiffness: 400, damping: 40, mass: 1 }
 
 export default function AppointmentSheet({ appt, onClose, onStatusChange }) {
+  const router = useRouter()
+
   function handleDragEnd(_, info) {
     // Mirror the booking page's dismiss logic: big downward drag or fast flick
     if (info.offset.y > 80 || info.velocity.y > 500) onClose()
+  }
+
+  function handleReschedule() {
+    onClose()
+    const time = minutesToTimeString(timeStringToMinutes(appt.time))
+    router.push(`/admin/new?date=${appt.date}&time=${time}`)
   }
 
   // Compute derived values only when we have an appointment
@@ -160,7 +169,7 @@ export default function AppointmentSheet({ appt, onClose, onStatusChange }) {
                 style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 28px)' }}
               >
                 <div className="flex-1">
-                  <GhostButton fullWidth onClick={onClose}>
+                  <GhostButton fullWidth onClick={handleReschedule}>
                     Reschedule
                   </GhostButton>
                 </div>
