@@ -12,8 +12,8 @@
 
 import { useRef, useEffect, useLayoutEffect } from 'react'
 
-const ITEM_H  = 36                // px — height of each row
-const VISIBLE = 5                 // rows shown at once
+const ITEM_H  = 30                // px — height of each row
+const VISIBLE = 3                 // rows shown at once
 const PAD     = Math.floor(VISIBLE / 2)   // = 2 rows of padding top + bottom
 const WHEEL_H = ITEM_H * VISIBLE  // = 220px total
 
@@ -79,7 +79,7 @@ function WheelColumn({ items, selectedIndex, onSelect, formatFn = String }) {
           style={{ height: ITEM_H, scrollSnapAlign: 'center' }}
           className="flex items-center justify-center"
         >
-          <span className="text-[19px] font-semibold tnum text-body select-none">
+          <span className="text-[16px] font-semibold tnum text-body select-none">
             {formatFn(item)}
           </span>
         </div>
