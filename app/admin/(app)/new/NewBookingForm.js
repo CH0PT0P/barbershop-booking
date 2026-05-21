@@ -17,17 +17,13 @@ import {
   formatLongDate,
   timeStringToMinutes,
   minutesToTimeString,
-  fmtShort,
   formatPhone,
 } from '../../../lib/time'
 import ScreenHeader from '../../components/layout/ScreenHeader'
 import PrimaryButton from '../../components/primitives/PrimaryButton'
 import Avatar from '../../components/primitives/Avatar'
 import Icon from '../../components/layout/Icon'
-
-// 15-min time slots from 9 AM to 7 PM
-const SLOTS = []
-for (let m = 9 * 60; m < 19 * 60; m += 15) SLOTS.push(m)
+import TimeWheel from '../../components/primitives/TimeWheel'
 
 const SERVICES = ["Men's Cut", 'Kids Cut', 'Beard Trim', 'Mullet Trim']
 
@@ -56,24 +52,8 @@ export default function NewBookingForm() {
   const [newName, setNewName]             = useState('')
   const [newPhone, setNewPhone]           = useState('')
 
-  // Already-booked slots for the selected date (to show as disabled)
-  const [bookedSlots, setBookedSlots] = useState([])
-
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]           = useState('')
-
-  // ─── Fetch booked slots whenever date changes ──────────────────
-  useEffect(() => {
-    if (!date) return
-    supabase
-      .from('appointments')
-      .select('time')
-      .eq('date', date)
-      .eq('status', 'booked')
-      .then(({ data }) => {
-        setBookedSlots((data || []).map(a => timeStringToMinutes(a.time)))
-      })
-  }, [date])
 
   // ─── Debounced client search ───────────────────────────────────
   useEffect(() => {
@@ -204,32 +184,15 @@ export default function NewBookingForm() {
             />
           </div>
 
-          {/* Time slots — 15-min grid, 9 AM–7 PM */}
-          <div className="grid grid-cols-4 gap-[6px]">
-            {SLOTS.map(m => {
-              const isSelected = m === selectedTime
-              const isBooked   = bookedSlots.includes(m)
-              return (
-                <button
-                  key={m}
-                  disabled={isBooked}
-                  onClick={() => !isBooked && setSelectedTime(m)}
-                  className={`
-                    py-[9px] rounded-[10px]
-                    text-[13px] font-semibold tnum
-                    transition-colors
-                    ${isSelected
-                      ? 'bg-pullman text-white'
-                      : isBooked
-                        ? 'bg-eggshell text-muted opacity-40 cursor-not-allowed'
-                        : 'bg-eggshell-soft text-body border-hairline border-[color:var(--color-hairline)] active:bg-eggshell'
-                    }
-                  `}
-                >
-                  {fmtShort(m)}
-                </button>
-              )
-            })}
+          {/* Time wheel */}
+          <div
+            className="
+              rounded-[16px] overflow-hidden
+              border-hairline border-[color:var(--color-hairline)]
+              bg-eggshell-soft
+            "
+          >
+            <TimeWheel value={selectedTime} onChange={setSelectedTime} />
           </div>
         </section>
 
