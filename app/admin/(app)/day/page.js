@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import {
@@ -35,7 +35,6 @@ export default function DayPage() {
 
   // Which appointment block was tapped (drives the detail sheet).
   const [selectedAppt, setSelectedAppt] = useState(null)
-  const dateInputRef = useRef(null)
 
   // ─── Data fetching ──────────────────────────────────────────────
 
@@ -142,20 +141,12 @@ export default function DayPage() {
         onLogout={handleLogout}
       />
 
-      {/* Hidden date input — programmatically opened when the label is tapped */}
-      <input
-        ref={dateInputRef}
-        type="date"
-        value={viewDate}
-        onChange={e => e.target.value && setViewDate(e.target.value)}
-        className="sr-only"
-      />
-
       <DateStrip
         label={formatLongDate(viewDate)}
         onPrev={() => changeDay(-1)}
         onNext={() => changeDay(1)}
-        onLabel={() => dateInputRef.current?.showPicker()}
+        dateValue={viewDate}
+        onDateChange={setViewDate}
       />
 
       {/* Scrollable timeline area — flex-1 fills whatever height remains */}

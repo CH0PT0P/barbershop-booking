@@ -2,14 +2,16 @@
 // Shown on the Day View just below the stats.
 //
 // Props:
-//   label   — text to display in the middle (e.g. "Thursday, May 28")
-//   onPrev  — handler for the left chevron (previous day)
-//   onNext  — handler for the right chevron (next day)
-//   onLabel — optional handler for tapping the label (open calendar picker)
+//   label        — text to display in the middle (e.g. "Thursday, May 28")
+//   onPrev       — handler for the left chevron (previous day)
+//   onNext       — handler for the right chevron (next day)
+//   dateValue    — current date as "YYYY-MM-DD"; when provided, tapping the
+//                  label opens the native date picker via an invisible overlay input
+//   onDateChange — called with the new "YYYY-MM-DD" string when a date is picked
 
 import Icon from './Icon'
 
-export default function DateStrip({ label, onPrev, onNext, onLabel }) {
+export default function DateStrip({ label, onPrev, onNext, dateValue, onDateChange }) {
   return (
     <div
       className="
@@ -21,16 +23,22 @@ export default function DateStrip({ label, onPrev, onNext, onLabel }) {
       "
     >
       <ChevronButton onClick={onPrev} direction="left" />
-      <button
-        type="button"
-        onClick={onLabel}
-        className="
-          flex-1 text-center text-[15px] font-semibold text-body tracking-[-0.2px]
-          bg-transparent
-        "
-      >
-        {label}
-      </button>
+
+      {/* Label — relative so the invisible date input can sit on top */}
+      <div className="relative flex-1 flex items-center justify-center">
+        <span className="text-[15px] font-semibold text-body tracking-[-0.2px] select-none">
+          {label}
+        </span>
+        {dateValue !== undefined && (
+          <input
+            type="date"
+            value={dateValue}
+            onChange={e => e.target.value && onDateChange?.(e.target.value)}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full"
+          />
+        )}
+      </div>
+
       <ChevronButton onClick={onNext} direction="right" />
     </div>
   )
