@@ -17,7 +17,7 @@ import PrimaryButton from '../../components/primitives/PrimaryButton'
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 
 export default function HoursPage() {
-  const [tab, setTab]                 = useState('Weekly')
+  const [tab, setTab]                 = useState('Overrides')
   const [availability, setAvailability] = useState([])
   const [overrides, setOverrides]     = useState([])
   const [loading, setLoading]         = useState(true)
