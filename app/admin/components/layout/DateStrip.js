@@ -25,7 +25,7 @@ export default function DateStrip({ label, onPrev, onNext, dateValue, onDateChan
       <ChevronButton onClick={onPrev} direction="left" />
 
       {/* Label — relative so the invisible date input can sit on top */}
-      <div className="relative flex-1 flex items-center justify-center">
+      <div className="relative flex items-center justify-center px-3">
         <span className="text-[15px] font-semibold text-body tracking-[-0.2px] select-none">
           {label}
         </span>
