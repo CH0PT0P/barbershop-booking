@@ -17,6 +17,8 @@
 // Props:
 //   appointments  — array from Supabase: { id, time, service, clients, notes }
 //   loading       — boolean; shows a centered loading message when true
+//   onSelectAppt  — called with the appointment object when a block is tapped
+//   onTapEmpty    — called with minutes-since-midnight when empty space is tapped
 
 import { getServiceColor, getServiceDuration } from '../../../lib/serviceColors'
 import { timeStringToMinutes, fmtShort } from '../../../lib/time'
@@ -38,7 +40,20 @@ function timeToTop(timeStr) {
   return (startMin - DAY_START * 60) * PX_PER_MIN
 }
 
-export default function Timeline({ appointments = [], loading = false, onSelectAppt }) {
+export default function Timeline({ appointments = [], loading = false, onSelectAppt, onTapEmpty }) {
+  // Tap on empty space: convert the Y position to a 15-min-snapped time.
+  // e.currentTarget.getBoundingClientRect() accounts for scroll offset correctly
+  // because both clientY and rect.top are in viewport coordinates.
+  function handleAreaTap(e) {
+    if (!onTapEmpty) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const y = e.clientY - rect.top
+    const rawMinutes = DAY_START * 60 + (y / PX_PER_HOUR) * 60
+    const snapped = Math.round(rawMinutes / 15) * 15
+    const clamped = Math.max(DAY_START * 60, Math.min(DAY_END * 60 - 15, snapped))
+    onTapEmpty(clamped)
+  }
+
   return (
     // Outer row: gutter on left, timeline area on right.
     // The total height is fixed (TOTAL_HEIGHT px). The parent scroll container
@@ -71,7 +86,11 @@ export default function Timeline({ appointments = [], loading = false, onSelectA
       </div>
 
       {/* ── Timeline area: dividers + appointment blocks ─────────── */}
-      <div className="flex-1 relative">
+      <div
+        className="flex-1 relative"
+        onClick={handleAreaTap}
+        style={{ cursor: onTapEmpty ? 'pointer' : 'default' }}
+      >
 
         {/* Hour divider lines — one per hour including DAY_END */}
         {HOURS.map(h => (
@@ -101,7 +120,7 @@ export default function Timeline({ appointments = [], loading = false, onSelectA
           return (
             <button
               key={appt.id}
-              onClick={() => onSelectAppt?.(appt)}
+              onClick={(e) => { e.stopPropagation(); onSelectAppt?.(appt) }}
               className={`
                 absolute rounded-[10px] border-l-4 overflow-hidden
                 px-[8px] py-[4px] text-left w-auto

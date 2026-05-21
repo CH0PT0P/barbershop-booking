@@ -12,6 +12,7 @@ import {
   parseDate,
   formatLongDate,
   thisWeekRange,
+  minutesToTimeString,
 } from '../../../lib/time'
 
 import BrandHeader from '../../components/layout/BrandHeader'
@@ -103,6 +104,11 @@ export default function DayPage() {
     router.replace('/admin')
   }
 
+  function handleTapEmpty(minutes) {
+    const time = minutesToTimeString(minutes)
+    router.push(`/admin/new?date=${viewDate}&time=${time}`)
+  }
+
   async function handleStatusChange(id, status) {
     const messages = {
       completed: 'Mark this appointment as complete?',
@@ -154,6 +160,7 @@ export default function DayPage() {
           appointments={appointments}
           loading={loading}
           onSelectAppt={setSelectedAppt}
+          onTapEmpty={handleTapEmpty}
         />
       </div>
 
