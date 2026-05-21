@@ -10,8 +10,8 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { supabase } from '../../../../lib/supabase'
-import { SERVICE_COLORS, SERVICE_DURATIONS, SERVICE_PRICES } from '../../../../lib/serviceColors'
+import { supabase } from '../../../lib/supabase'
+import { SERVICE_COLORS, SERVICE_DURATIONS, SERVICE_PRICES } from '../../../lib/serviceColors'
 import {
   todayString,
   formatLongDate,
@@ -19,11 +19,11 @@ import {
   minutesToTimeString,
   fmtShort,
   formatPhone,
-} from '../../../../lib/time'
-import ScreenHeader from '../../../components/layout/ScreenHeader'
-import PrimaryButton from '../../../components/primitives/PrimaryButton'
-import Avatar from '../../../components/primitives/Avatar'
-import Icon from '../../../components/layout/Icon'
+} from '../../../lib/time'
+import ScreenHeader from '../../components/layout/ScreenHeader'
+import PrimaryButton from '../../components/primitives/PrimaryButton'
+import Avatar from '../../components/primitives/Avatar'
+import Icon from '../../components/layout/Icon'
 
 // 15-min time slots from 9 AM to 7 PM
 const SLOTS = []
