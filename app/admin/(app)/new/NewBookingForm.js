@@ -153,7 +153,7 @@ export default function NewBookingForm() {
 
   // ─── Render ────────────────────────────────────────────────────
   return (
-    <div>
+    <div className="overflow-y-auto" style={{ height: '100dvh' }}>
       <ScreenHeader
         eyebrow="BOOK"
         title="New Appointment"
@@ -167,7 +167,10 @@ export default function NewBookingForm() {
         }
       />
 
-      <div className="px-4 flex flex-col gap-7 pb-10">
+      <div
+        className="px-4 flex flex-col gap-7"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 96px)' }}
+      >
 
         {/* ── When ──────────────────────────────────────────────── */}
         <section>
