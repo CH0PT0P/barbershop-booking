@@ -34,7 +34,7 @@ export default function TabBar() {
       style={{
         // iOS safe area: respects the home indicator on iPhones with
         // notches/dynamic islands; falls back to 32px on devices without it.
-        paddingBottom: 'max(env(safe-area-inset-bottom), 32px)',
+        paddingBottom: 'max(env(safe-area-inset-bottom), 8px)',
       }}
     >
       {TABS.map(tab => {
