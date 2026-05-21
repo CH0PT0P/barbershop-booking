@@ -38,6 +38,15 @@ export default function NewBookingForm() {
     ? timeStringToMinutes(params.get('time'))
     : 11 * 60
 
+  // When coming from Reschedule, these are set so the client is pre-filled
+  // and the old appointment is cancelled after the new one is saved.
+  const rescheduleId     = params.get('rescheduleId')  || null
+  const rescheduleClient = rescheduleId ? {
+    id:    params.get('clientId')   || '',
+    name:  params.get('clientName') || '',
+    phone: params.get('clientPhone') || '',
+  } : null
+
   const [date, setDate]                 = useState(initialDate)
   const [selectedTime, setSelectedTime] = useState(initialTime)
   const [service, setService]           = useState('')
@@ -45,7 +54,7 @@ export default function NewBookingForm() {
   // Client search state
   const [clientSearch, setClientSearch]     = useState('')
   const [searchResults, setSearchResults]   = useState([])
-  const [selectedClient, setSelectedClient] = useState(null)
+  const [selectedClient, setSelectedClient] = useState(rescheduleClient)
 
   // New client state
   const [showNewClient, setShowNewClient] = useState(false)
@@ -127,6 +136,14 @@ export default function NewBookingForm() {
       return
     }
 
+    // If rescheduling, cancel the old appointment now that the new one is saved.
+    if (rescheduleId) {
+      await supabase
+        .from('appointments')
+        .update({ status: 'cancelled' })
+        .eq('id', rescheduleId)
+    }
+
     // Go back to the day view — the timeline will refresh and show the new block.
     router.push('/admin/day')
   }
@@ -135,8 +152,8 @@ export default function NewBookingForm() {
   return (
     <div className="overflow-y-auto" style={{ height: '100dvh' }}>
       <ScreenHeader
-        eyebrow="BOOK"
-        title="New Appointment"
+        eyebrow={rescheduleId ? 'RESCHEDULE' : 'BOOK'}
+        title={rescheduleId ? 'Pick a New Time' : 'New Appointment'}
         trailing={
           <button
             onClick={() => router.back()}
@@ -364,7 +381,10 @@ export default function NewBookingForm() {
           disabled={!canSubmit || submitting}
           onClick={handleSubmit}
         >
-          {submitting ? 'Booking…' : 'Confirm Booking'}
+          {submitting
+            ? (rescheduleId ? 'Rescheduling…' : 'Booking…')
+            : (rescheduleId ? 'Confirm Reschedule' : 'Confirm Booking')
+          }
         </PrimaryButton>
 
       </div>

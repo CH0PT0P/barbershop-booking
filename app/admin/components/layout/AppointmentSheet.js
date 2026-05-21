@@ -31,8 +31,14 @@ export default function AppointmentSheet({ appt, onClose, onStatusChange }) {
 
   function handleReschedule() {
     onClose()
-    const time = minutesToTimeString(timeStringToMinutes(appt.time))
-    router.push(`/admin/new?date=${appt.date}&time=${time}`)
+    const time   = minutesToTimeString(timeStringToMinutes(appt.time))
+    const name   = encodeURIComponent(appt.clients?.name  ?? '')
+    const phone  = encodeURIComponent(appt.clients?.phone ?? '')
+    router.push(
+      `/admin/new?date=${appt.date}&time=${time}` +
+      `&rescheduleId=${appt.id}&clientId=${appt.client_id}` +
+      `&clientName=${name}&clientPhone=${phone}`
+    )
   }
 
   // Compute derived values only when we have an appointment
