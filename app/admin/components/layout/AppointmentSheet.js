@@ -37,7 +37,8 @@ export default function AppointmentSheet({ appt, onClose, onStatusChange }) {
     router.push(
       `/admin/new?date=${appt.date}&time=${time}` +
       `&rescheduleId=${appt.id}&clientId=${appt.client_id}` +
-      `&clientName=${name}&clientPhone=${phone}`
+      `&clientName=${name}&clientPhone=${phone}` +
+      `&service=${encodeURIComponent(appt.service)}`
     )
   }
 

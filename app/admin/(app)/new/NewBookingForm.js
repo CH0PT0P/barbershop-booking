@@ -49,7 +49,7 @@ export default function NewBookingForm() {
 
   const [date, setDate]                 = useState(initialDate)
   const [selectedTime, setSelectedTime] = useState(initialTime)
-  const [service, setService]           = useState('')
+  const [service, setService]           = useState(params.get('service') || '')
 
   // Client search state
   const [clientSearch, setClientSearch]     = useState('')
