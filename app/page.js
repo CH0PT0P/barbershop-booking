@@ -31,10 +31,10 @@ export default function Home() {
       </div>
 
       {/* Book Now CTA */}
-      <div className="px-6 pb-8 pt-4">
+      <div className="px-6 pt-4 pb-[calc(env(safe-area-inset-bottom)+3.5rem)]">
         <Link
           href="/book"
-          className="flex items-center justify-center gap-2 w-full py-5 rounded-full text-base font-semibold"
+          className="flex items-center justify-center gap-2 w-full py-5 rounded-full text-base font-semibold shadow-[0_12px_28px_rgba(31,26,20,0.26)]"
           style={{
             backgroundColor: '#1F1A14',
             color: '#FBF6E8',
