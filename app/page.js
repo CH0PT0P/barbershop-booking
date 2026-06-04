@@ -22,11 +22,11 @@ export default function Home() {
       </div>
 
       {/* Hero — logo fills the upper area */}
-      <div className="flex-1 flex items-center justify-center px-6">
+      <div className="flex-1 flex items-center justify-center">
         <img
           src="/landing-hero.svg"
           alt="Dev the Barber"
-          className="w-full"
+          className="w-full h-full object-contain"
         />
       </div>
 
