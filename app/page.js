@@ -2,15 +2,20 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <main
-      className="h-[100dvh] flex flex-col overflow-hidden"
-      style={{
-        backgroundImage: 'url(/landing-bg.svg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundColor: '#F1E8D2',
-      }}
-    >
+    <main className="relative h-[100dvh] flex flex-col overflow-hidden">
+      {/* Full-screen background — pinned to the viewport so it always
+          covers edge to edge, with no gap at the top or bottom */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: 'url(/landing-bg.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#F1E8D2',
+        }}
+      />
+
       {/* Wordmark */}
       <div className="flex justify-center pt-14 pb-2">
         <p
@@ -26,7 +31,7 @@ export default function Home() {
         <img
           src="/landing-hero.svg"
           alt="Dev the Barber"
-          className="max-h-full max-w-full object-contain"
+          className="w-full h-full object-contain"
         />
       </div>
 
