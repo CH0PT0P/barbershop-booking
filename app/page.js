@@ -19,8 +19,8 @@ export default function Home() {
 
       {/* Content layer — sits above the background (z-10) */}
       <div className="relative z-10 flex h-full flex-col">
-        {/* Wordmark */}
-        <div className="flex justify-center pt-14 pb-2">
+        {/* Wordmark — top padding respects the phone's status-bar safe area */}
+        <div className="flex justify-center pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-2">
           <p
             className="text-xs font-semibold tracking-[0.25em] uppercase"
             style={{ color: '#8B8071' }}
@@ -40,7 +40,7 @@ export default function Home() {
           />
         </div>
 
-        {/* Book Now CTA */}
+        {/* Book Now CTA — bottom padding respects the home-bar safe area */}
         <div className="px-6 pt-4 pb-[calc(env(safe-area-inset-bottom)+3.5rem)]">
           <Link
             href="/book"
