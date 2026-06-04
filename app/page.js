@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function Home() {
   return (
     <main
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
       style={{
         backgroundImage: 'url(/landing-bg.png)',
         backgroundSize: 'cover',
