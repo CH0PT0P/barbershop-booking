@@ -4,8 +4,7 @@ export default function Home() {
   return (
     <main className="relative h-[100dvh] overflow-hidden">
       {/* Full-screen background — pinned to the viewport, sits BEHIND the
-          content (z-0) but in front of the page itself, so it covers
-          edge to edge with no gaps. */}
+          content (z-0) but in front of the page itself. */}
       <div
         className="fixed inset-0 z-0"
         style={{
@@ -19,8 +18,8 @@ export default function Home() {
 
       {/* Content layer — sits above the background (z-10) */}
       <div className="relative z-10 flex h-full flex-col">
-        {/* Wordmark — top padding respects the phone's status-bar safe area */}
-        <div className="flex justify-center pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-2">
+        {/* Wordmark */}
+        <div className="flex justify-center pt-14 pb-2">
           <p
             className="text-xs font-semibold tracking-[0.25em] uppercase"
             style={{ color: '#8B8071' }}
@@ -29,8 +28,7 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Hero — the scale() number controls the size.
-            Bigger number = bigger logo. Currently doubled (2). */}
+        {/* Hero — the scale() number controls the size. */}
         <div className="flex-1 min-h-0 flex items-center justify-center px-6">
           <img
             src="/landing-hero.svg"
@@ -40,7 +38,7 @@ export default function Home() {
           />
         </div>
 
-        {/* Book Now CTA — bottom padding respects the home-bar safe area */}
+        {/* Book Now CTA */}
         <div className="px-6 pt-4 pb-[calc(env(safe-area-inset-bottom)+3.5rem)]">
           <Link
             href="/book"
