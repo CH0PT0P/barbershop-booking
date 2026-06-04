@@ -5,7 +5,7 @@ export default function Home() {
     <main
       className="h-screen flex flex-col overflow-hidden"
       style={{
-        backgroundImage: 'url(/landing-bg.png)',
+        backgroundImage: 'url(/landing-bg.svg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundColor: '#F1E8D2',
@@ -31,7 +31,7 @@ export default function Home() {
       </div>
 
       {/* Book Now CTA */}
-      <div className="px-6 pb-16 pt-4">
+      <div className="px-6 pb-8 pt-4">
         <Link
           href="/book"
           className="flex items-center justify-center w-full py-5 rounded-full text-base font-semibold"
