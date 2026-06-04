@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function Home() {
   return (
     <main
-      className="h-screen flex flex-col overflow-hidden"
+      className="h-[100dvh] flex flex-col overflow-hidden"
       style={{
         backgroundImage: 'url(/landing-bg.svg)',
         backgroundSize: 'cover',
@@ -22,11 +22,11 @@ export default function Home() {
       </div>
 
       {/* Hero — logo fills the upper area */}
-      <div className="flex-1 overflow-hidden flex items-center justify-center">
+      <div className="flex-1 min-h-0 flex items-center justify-center px-6 py-2">
         <img
           src="/landing-hero.svg"
           alt="Dev the Barber"
-          style={{ width: '100%', height: 'auto', transform: 'scale(2)', transformOrigin: 'center' }}
+          className="max-h-full max-w-full object-contain"
         />
       </div>
 
@@ -34,16 +34,16 @@ export default function Home() {
       <div className="px-6 pb-8 pt-4">
         <Link
           href="/book"
-          className="flex items-center justify-center w-full py-5 rounded-full text-base font-semibold"
+          className="flex items-center justify-center gap-2 w-full py-5 rounded-full text-base font-semibold"
           style={{
             backgroundColor: '#1F1A14',
             color: '#FBF6E8',
           }}
         >
-          Book Now &nbsp;→
+          Book Now
+          <span aria-hidden="true">→</span>
         </Link>
       </div>
-
     </main>
   )
 }
