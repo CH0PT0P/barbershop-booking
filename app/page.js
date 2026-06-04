@@ -29,7 +29,7 @@ export default function Home() {
         </div>
 
         {/* Hero — the scale() number controls the size. */}
-        <div className="flex-1 min-h-0 flex items-center justify-center px-6">
+        <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center px-6">
           <img
             src="/landing-hero.svg"
             alt="Dev the Barber"
