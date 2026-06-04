@@ -34,7 +34,7 @@ export default function Home() {
             src="/landing-hero.svg"
             alt="Dev the Barber"
             className="w-full h-full object-contain"
-            style={{ transform: 'scale(2)' }}
+            style={{ transform: 'scale(1.4)' }}
           />
         </div>
 
